@@ -2,103 +2,163 @@
 
 namespace app\models;
 
-class User extends \yii\base\BaseObject implements \yii\web\IdentityInterface
+use Yii;
+use yii\db\ActiveRecord;
+use yii\web\IdentityInterface;
+
+class User extends ActiveRecord implements IdentityInterface
 {
     public $id;
-    public $username;
-    public $password;
     public $authKey;
     public $accessToken;
+    public $rememberMe = true;
 
-    private static $users = [
-        '100' => [
-            'id' => '100',
-            'username' => 'admin',
-            'password' => 'admin',
-            'authKey' => 'test100key',
-            'accessToken' => '100-token',
-        ],
-        '101' => [
-            'id' => '101',
-            'username' => 'demo',
-            'password' => 'demo',
-            'authKey' => 'test101key',
-            'accessToken' => '101-token',
-        ],
-    ];
+    /**
+     * {@inheritdoc}
+     */
+    public static function tableName()
+    {
+        return 'user';
+    }
 
+    /**
+     * {@inheritdoc}
+     */
+    public function rules()
+    {
+        return [
+            [['username', 'email', 'password'], 'required'],
+            ['email', 'email'],
+            [['username', 'email'], 'string', 'max' => 255],
+            [['password'], 'string'],
+            [['birthdate', 'created_at', 'updated_at'], 'safe'], // Permet de passer ces dates sans validation complexe
+        ];
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function attributeLabels()
+    {
+        return [
+            'username' => 'Nom d\'utilisateur',
+            'email' => 'Adresse e-mail',
+            'password' => 'Mot de passe',
+            'birthdate' => 'Date de naissance',
+            'created_at' => 'Date de création',
+            'updated_at' => 'Dernière mise à jour',
+        ];
+    }
+
+    /**
+     * Gets query for [[Availability]].
+     *
+     * @return \yii\db\ActiveQuery
+     */
+    public function getAvailability()
+    {
+        return $this->hasMany(Availability::class, ['user_id' => 'id']);
+    }
+
+    /**
+     * Gets query for [[Sessions]].
+     *
+     * @return \yii\db\ActiveQuery
+     */
+    public function getSessions()
+    {
+        return $this->hasMany(Sessions::class, ['host_id' => 'id']);
+    }
+
+    /**
+     * Gets query for [[ParticipateSessions]].
+     *
+     * @return \yii\db\ActiveQuery
+     */
+    public function getParticipateSessions()
+    {
+        return $this->hasMany(UsersParticipateSessions::class, ['user_id' => 'id']);
+    }
+
+    /**
+     * Gets query for [[Games]].
+     *
+     * @return \yii\db\ActiveQuery
+     */
+    public function getGames()
+    {
+        return $this->hasMany(Games::class, ['id' => 'game_id'])
+            ->viaTable('userhavegames', ['user_id' => 'id']);
+    }
+
+    public static function findByUserEmail($email)
+    {
+        return self::findOne(["email" => $email]);
+    }
 
     /**
      * {@inheritdoc}
      */
     public static function findIdentity($id)
     {
-        return isset(self::$users[$id]) ? new static(self::$users[$id]) : null;
+        return static::findOne($id);
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public static function findIdentityByAccessToken($token, $type = null)
     {
-        foreach (self::$users as $user) {
-            if ($user['accessToken'] === $token) {
-                return new static($user);
-            }
-        }
-
-        return null;
+        return static::findOne(['accessToken' => $token]);
     }
 
-    /**
-     * Finds user by username
-     *
-     * @param string $username
-     * @return static|null
-     */
     public static function findByUsername($username)
     {
-        foreach (self::$users as $user) {
-            if (strcasecmp($user['username'], $username) === 0) {
-                return new static($user);
-            }
-        }
-
-        return null;
+        Yii::info("Recherche de l'utilisateur : " . $username, __METHOD__);
+        $user = self::find()->where(['username' => $username])->one();
+        Yii::info("Résultat de la requête : " . print_r($user, true), __METHOD__);
+        return $user;
     }
 
-    /**
-     * {@inheritdoc}
-     */
+    public function validatePassword($passwordHash)
+    {
+        return Yii::$app->getSecurity()->validatePassword($this->password, $passwordHash);
+    }
+
     public function getId()
     {
-        return $this->id;
+        return $this->getPrimaryKey(); // Yii gère l'ID avec la clé primaire
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getAuthKey()
     {
-        return $this->authKey;
+        return $this->auth_key;
+    }
+
+    public function validateAuthKey($authKey)
+    {
+        return $this->getAuthKey() === $authKey;
     }
 
     /**
      * {@inheritdoc}
      */
-    public function validateAuthKey($authKey)
+    public function beforeSave($insert)
     {
-        return $this->authKey === $authKey;
+        if (parent::beforeSave($insert)) {
+            // Générer un auth_key si c'est un nouvel utilisateur
+            if ($this->isNewRecord) {
+                $this->auth_key = Yii::$app->security->generateRandomString();
+            }
+            return true;
+        }
+        return false;
     }
 
-    /**
-     * Validates password
-     *
-     * @param string $password password to validate
-     * @return bool if password provided is valid for current user
-     */
-    public function validatePassword($password)
+    public function login()
     {
-        return $this->password === $password;
+        $user = $this->findByUserEmail($this->email);
+        if ($user && $this->validatePassword($user->password)) {
+            return Yii::$app->user->login($user, $this->rememberMe ? 3600 * 24 * 30 : 0);
+        } else {
+            $this->addError('password', 'Nom ou mot de passe incorrect');
+        }
     }
 }

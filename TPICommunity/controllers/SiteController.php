@@ -9,6 +9,8 @@ use yii\web\Response;
 use yii\filters\VerbFilter;
 use app\models\LoginForm;
 use app\models\ContactForm;
+use app\models\User;
+
 
 class SiteController extends Controller
 {
@@ -37,6 +39,7 @@ class SiteController extends Controller
             ],
         ];
     }
+
 
     /**
      * {@inheritdoc}
@@ -75,14 +78,24 @@ class SiteController extends Controller
             return $this->goHome();
         }
 
-        $model = new LoginForm();
-        if ($model->load(Yii::$app->request->post()) && $model->login()) {
-            return $this->goBack();
+        $request = Yii::$app->request->post();
+
+        $user = new User();
+        if($request)
+        {
+            if ($user->load($request) && $user->login())
+            {
+                return $this->redirect(["site/index"]);
+            }
+
+            $session = Yii::$app->session;
+            $session->setFlash('errorMessages', $user->getErrors());
         }
 
-        $model->password = '';
+
+        $user->password = '';
         return $this->render('login', [
-            'model' => $model,
+            'user' => $user,
         ]);
     }
 
@@ -124,5 +137,34 @@ class SiteController extends Controller
     public function actionAbout()
     {
         return $this->render('about');
+    }
+
+    /**
+     * Signup action.
+     *
+     * @return Response|string
+     */
+    public function actionSignup()
+    {
+        $user = new User();
+        $session = Yii::$app->session;
+    
+        if ($user->load(Yii::$app->request->post())) {
+            // Affectation des données et hachage du mot de passe
+            $postData = Yii::$app->request->post('User', []);
+            $user->username = $postData['username'] ?? null;
+            $user->password = Yii::$app->getSecurity()->generatePasswordHash($user->password);
+    
+            if ($user->validate() && $user->save()) {
+                $session->setFlash('successMessage', 'Inscription Réussie');
+                return $this->redirect(['site/login']);
+            } else {
+                $session->setFlash('errorMessages', $user->getErrors());
+            }
+        }
+    
+        return $this->render('signup', [
+            'model' => $user,
+        ]);
     }
 }

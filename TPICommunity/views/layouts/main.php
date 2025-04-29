@@ -33,25 +33,28 @@ AppAsset::register($this);
             'brandLabel' => Yii::$app->name,
             'brandUrl' => Yii::$app->homeUrl,
             'options' => [
-                'class' => 'navbar navbar-expand-md navbar-dark bg-dark fixed-top',
+                'class' => 'navbar navbar-expand-lg navbar-dark bg-dark',
             ],
         ]);
         echo Nav::widget([
-            'options' => ['class' => 'navbar-nav'],
+            'options' => ['class' => 'navbar-nav mr-auto'], // Partie gauche (principal)
             'items' => [
                 ['label' => 'Page Principale', 'url' => ['/site/index']],
-                ['label' => 'A propos', 'url' => ['/site/about']],
-                ['label' => 'Contact', 'url' => ['/site/contact']],
 
-                !Yii::$app->user->isGuest ? ['label' => 'Sessions', 'url' => ['/sessions/index']] : '',
+                !Yii::$app->user->isGuest ? ['label' => 'Sessions', 'url' => ['/session/index']] : '',
                 !Yii::$app->user->isGuest ? ['label' => 'Disponibilités', 'url' => ['/availability/index']] : '',
-                !Yii::$app->user->isGuest ? ['label' => 'Jeux', 'url' => ['/games/index']] : '',
+                !Yii::$app->user->isGuest && Yii::$app->user->identity->type !== 'USER' ? ['label' => '(Admin)Jeux', 'url' => ['/games/index']] : '',
+                !Yii::$app->user->isGuest && Yii::$app->user->identity->type !== 'USER' ? ['label' => '(Admin)Genre', 'url' => ['/genre/index']] : '',
+                !Yii::$app->user->isGuest && Yii::$app->user->identity->type !== 'USER' ? ['label' => '(Admin)Plateforme', 'url' => ['/platform/index']] : '',
+            ],
+        ]);
 
-
-                Yii::$app->user->isGuest ? (['label' => 'Inscription', 'url' => ['/site/signup']]) : '',
-                Yii::$app->user->isGuest ? (
-                    ['label' => 'Connexion', 'url' => ['/site/login']]
-                ) : (
+        echo Nav::widget([
+            'options' => ['class' => 'navbar-nav ml-auto'], // Partie droite (connexion/inscription)
+            'items' => [
+                !Yii::$app->user->isGuest ? ['label' => 'Mon profil', 'url' => ['/user/profile']] : '',
+                Yii::$app->user->isGuest ? ['label' => 'Inscription', 'url' => ['/site/signup']] : '',
+                Yii::$app->user->isGuest ? ['label' => 'Connexion', 'url' => ['/site/login']] : (
                     '<li>'
                     . Html::beginForm(['/site/logout'], 'post', ['class' => 'form-inline'])
                     . Html::submitButton(
@@ -60,9 +63,10 @@ AppAsset::register($this);
                     )
                     . Html::endForm()
                     . '</li>'
-                )
+                ),
             ],
         ]);
+
         NavBar::end();
         ?>
     </header>

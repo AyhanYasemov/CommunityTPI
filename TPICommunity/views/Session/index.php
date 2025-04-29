@@ -1,24 +1,24 @@
 <?php
 
-use app\models\Platforms;
+use app\models\Session;
 use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\grid\ActionColumn;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
 /** @var yii\web\View $this */
-/** @var app\models\PlatformsSearch $searchModel */
+/** @var app\models\SessionSearch $searchModel */
 /** @var yii\data\ActiveDataProvider $dataProvider */
 
-$this->title = 'Platforms';
+$this->title = 'Sessions';
 $this->params['breadcrumbs'][] = $this->title;
 ?>
-<div class="platforms-index">
+<div class="session-index">
 
     <h1><?= Html::encode($this->title) ?></h1>
 
     <p>
-        <?= Html::a('Créer plateforme de jeu', ['create'], ['class' => 'btn btn-success']) ?>
+        <?= Html::a('Create Session', ['create'], ['class' => 'btn btn-success']) ?>
     </p>
 
     <?php Pjax::begin(); ?>
@@ -30,12 +30,17 @@ $this->params['breadcrumbs'][] = $this->title;
         'columns' => [
             ['class' => 'yii\grid\SerialColumn'],
 
-            'id_platform',
-            'name',
+            'id_session',
+            'start_date',
+            'end_date',
+            'status',
+            'FKid_host',
+            //'name',
+            //'FKid_game',
             [
                 'class' => ActionColumn::className(),
-                'urlCreator' => function ($action, Platforms $model, $key, $index, $column) {
-                    return Url::toRoute([$action, 'id' => $model->id_platform]);
+                'urlCreator' => function ($action, Session $model, $key, $index, $column) {
+                    return Url::toRoute([$action, 'id_session' => $model->id_session]);
                  }
             ],
         ],

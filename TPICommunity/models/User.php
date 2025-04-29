@@ -12,7 +12,6 @@ class User extends ActiveRecord implements IdentityInterface
     public $authKey;
     public $accessToken;
     public $rememberMe = true;
-
     /**
      * {@inheritdoc}
      */
@@ -67,7 +66,7 @@ class User extends ActiveRecord implements IdentityInterface
      */
     public function getSessions()
     {
-        return $this->hasMany(Sessions::class, ['host_id' => 'id']);
+        return $this->hasMany(Session::class, ['host_id' => 'id']);
     }
 
     /**
@@ -161,4 +160,53 @@ class User extends ActiveRecord implements IdentityInterface
             $this->addError('password', 'Nom ou mot de passe incorrect');
         }
     }
+
+        /**
+     * Gets query for games owned by the user (table OWN)
+     * @return \yii\db\ActiveQuery
+     */
+    public function getOwnGames()
+    {
+        return $this->hasMany(Games::class, ['id_game' => 'FKid_game'])
+                    ->viaTable('own', ['FKid_user' => 'id_user']);
+    }
+
+    /**
+     * Gets query for the availability slots of the user
+     * @return \yii\db\ActiveQuery
+     */
+    public function getAvailabilities()
+    {
+        return $this->hasMany(Availability::class, ['FKid_user' => 'id_user']);
+    }
+
+    /**
+     * Gets query for raw preferences of the user
+     * @return \yii\db\ActiveQuery
+     */
+    public function getPreferences()
+    {
+        return $this->hasMany(Preference::class, ['FKid_user' => 'id_user']);
+    }
+
+    /**
+     * Gets query for preferred genres via table PREFERENCE
+     * @return \yii\db\ActiveQuery
+     */
+    public function getPreferredGenres()
+    {
+        return $this->hasMany(Genres::class, ['id_genre' => 'FKid_genre'])
+                    ->via('preference');
+    }
+
+    /**
+     * Gets query for preferred games via table PREFERENCE
+     * @return \yii\db\ActiveQuery
+     */
+    public function getPreferredGames()
+    {
+        return $this->hasMany(Games::class, ['id_game' => 'FKid_game'])
+                    ->via('preference');
+    }
 }
+

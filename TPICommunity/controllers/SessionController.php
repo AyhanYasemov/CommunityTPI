@@ -2,18 +2,16 @@
 
 namespace app\controllers;
 
-use app\models\Genres;
-use app\models\GenreSearch;
+use app\models\Session;
+use app\models\SessionSearch;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
-use yii\filters\AccessControl;
-use Yii;
 
 /**
- * GenreController implements the CRUD actions for Genres model.
+ * SessionController implements the CRUD actions for Session model.
  */
-class GenreController extends Controller
+class SessionController extends Controller
 {
     /**
      * @inheritDoc
@@ -23,20 +21,8 @@ class GenreController extends Controller
         return array_merge(
             parent::behaviors(),
             [
-                'access' => [
-                    'class' => AccessControl::class,
-                    'rules' => [
-                        [
-                            'allow' => true,
-                            'roles' => ['@'],
-                            'matchCallback' => function ($rule, $action) {
-                                return Yii::$app->user->identity->type === 'admin';
-                            },
-                        ],
-                    ],
-                ],
                 'verbs' => [
-                    'class' => VerbFilter::class,
+                    'class' => VerbFilter::className(),
                     'actions' => [
                         'delete' => ['POST'],
                     ],
@@ -46,13 +32,13 @@ class GenreController extends Controller
     }
 
     /**
-     * Lists all Genres models.
+     * Lists all Session models.
      *
      * @return string
      */
     public function actionIndex()
     {
-        $searchModel = new GenreSearch();
+        $searchModel = new SessionSearch();
         $dataProvider = $searchModel->search($this->request->queryParams);
 
         return $this->render('index', [
@@ -62,30 +48,30 @@ class GenreController extends Controller
     }
 
     /**
-     * Displays a single Genres model.
-     * @param int $id ID
+     * Displays a single Session model.
+     * @param int $id_session Id Session
      * @return string
      * @throws NotFoundHttpException if the model cannot be found
      */
-    public function actionView($id)
+    public function actionView($id_session)
     {
         return $this->render('view', [
-            'model' => $this->findModel($id),
+            'model' => $this->findModel($id_session),
         ]);
     }
 
     /**
-     * Creates a new Genres model.
+     * Creates a new Session model.
      * If creation is successful, the browser will be redirected to the 'view' page.
      * @return string|\yii\web\Response
      */
     public function actionCreate()
     {
-        $model = new Genres();
+        $model = new Session();
 
         if ($this->request->isPost) {
             if ($model->load($this->request->post()) && $model->save()) {
-                return $this->redirect(['view', 'id' => $model->id_genre]);
+                return $this->redirect(['view', 'id_session' => $model->id_session]);
             }
         } else {
             $model->loadDefaultValues();
@@ -97,18 +83,18 @@ class GenreController extends Controller
     }
 
     /**
-     * Updates an existing Genres model.
+     * Updates an existing Session model.
      * If update is successful, the browser will be redirected to the 'view' page.
-     * @param int $id ID
+     * @param int $id_session Id Session
      * @return string|\yii\web\Response
      * @throws NotFoundHttpException if the model cannot be found
      */
-    public function actionUpdate($id)
+    public function actionUpdate($id_session)
     {
-        $model = $this->findModel($id);
+        $model = $this->findModel($id_session);
 
         if ($this->request->isPost && $model->load($this->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->id_genre]);
+            return $this->redirect(['view', 'id_session' => $model->id_session]);
         }
 
         return $this->render('update', [
@@ -117,29 +103,29 @@ class GenreController extends Controller
     }
 
     /**
-     * Deletes an existing Genres model.
+     * Deletes an existing Session model.
      * If deletion is successful, the browser will be redirected to the 'index' page.
-     * @param int $id ID
+     * @param int $id_session Id Session
      * @return \yii\web\Response
      * @throws NotFoundHttpException if the model cannot be found
      */
-    public function actionDelete($id)
+    public function actionDelete($id_session)
     {
-        $this->findModel($id)->delete();
+        $this->findModel($id_session)->delete();
 
         return $this->redirect(['index']);
     }
 
     /**
-     * Finds the Genres model based on its primary key value.
+     * Finds the Session model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
-     * @param int $id ID
-     * @return Genres the loaded model
+     * @param int $id_session Id Session
+     * @return Session the loaded model
      * @throws NotFoundHttpException if the model cannot be found
      */
-    protected function findModel($id)
+    protected function findModel($id_session)
     {
-        if (($model = Genres::findOne(['id_genre' => $id])) !== null) {
+        if (($model = Session::findOne(['id_session' => $id_session])) !== null) {
             return $model;
         }
 

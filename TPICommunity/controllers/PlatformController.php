@@ -7,6 +7,9 @@ use app\models\PlatformsSearch;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
+use yii\filters\AccessControl;
+use Yii;
+
 
 /**
  * PlatformController implements the CRUD actions for Platforms model.
@@ -21,8 +24,20 @@ class PlatformController extends Controller
         return array_merge(
             parent::behaviors(),
             [
+                'access' => [
+                    'class' => AccessControl::class,
+                    'rules' => [
+                        [
+                            'allow' => true,
+                            'roles' => ['@'],
+                            'matchCallback' => function ($rule, $action) {
+                                return Yii::$app->user->identity->type === 'admin';
+                            },
+                        ],
+                    ],
+                ],
                 'verbs' => [
-                    'class' => VerbFilter::className(),
+                    'class' => VerbFilter::class,
                     'actions' => [
                         'delete' => ['POST'],
                     ],
@@ -30,6 +45,7 @@ class PlatformController extends Controller
             ]
         );
     }
+
 
     /**
      * Lists all Platforms models.
@@ -71,7 +87,7 @@ class PlatformController extends Controller
 
         if ($this->request->isPost) {
             if ($model->load($this->request->post()) && $model->save()) {
-                return $this->redirect(['view', 'id' => $model->id]);
+                return $this->redirect(['view', 'id' => $model->id_platform]);
             }
         } else {
             $model->loadDefaultValues();
@@ -94,7 +110,7 @@ class PlatformController extends Controller
         $model = $this->findModel($id);
 
         if ($this->request->isPost && $model->load($this->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->id]);
+            return $this->redirect(['view', 'id' => $model->id_platform]);
         }
 
         return $this->render('update', [
@@ -125,7 +141,7 @@ class PlatformController extends Controller
      */
     protected function findModel($id)
     {
-        if (($model = Platforms::findOne(['id' => $id])) !== null) {
+        if (($model = Platforms::findOne(['id_platform' => $id])) !== null) {
             return $model;
         }
 

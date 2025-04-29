@@ -2,18 +2,16 @@
 
 namespace app\controllers;
 
-use app\models\Genres;
-use app\models\GenreSearch;
+use app\models\Participate;
+use app\models\ParticipateSearch;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
-use yii\filters\AccessControl;
-use Yii;
 
 /**
- * GenreController implements the CRUD actions for Genres model.
+ * ParticipateController implements the CRUD actions for Participate model.
  */
-class GenreController extends Controller
+class ParticipateController extends Controller
 {
     /**
      * @inheritDoc
@@ -23,20 +21,8 @@ class GenreController extends Controller
         return array_merge(
             parent::behaviors(),
             [
-                'access' => [
-                    'class' => AccessControl::class,
-                    'rules' => [
-                        [
-                            'allow' => true,
-                            'roles' => ['@'],
-                            'matchCallback' => function ($rule, $action) {
-                                return Yii::$app->user->identity->type === 'admin';
-                            },
-                        ],
-                    ],
-                ],
                 'verbs' => [
-                    'class' => VerbFilter::class,
+                    'class' => VerbFilter::className(),
                     'actions' => [
                         'delete' => ['POST'],
                     ],
@@ -46,13 +32,13 @@ class GenreController extends Controller
     }
 
     /**
-     * Lists all Genres models.
+     * Lists all Participate models.
      *
      * @return string
      */
     public function actionIndex()
     {
-        $searchModel = new GenreSearch();
+        $searchModel = new ParticipateSearch();
         $dataProvider = $searchModel->search($this->request->queryParams);
 
         return $this->render('index', [
@@ -62,30 +48,31 @@ class GenreController extends Controller
     }
 
     /**
-     * Displays a single Genres model.
-     * @param int $id ID
+     * Displays a single Participate model.
+     * @param int $FKid_user F Kid User
+     * @param int $FKid_session F Kid Session
      * @return string
      * @throws NotFoundHttpException if the model cannot be found
      */
-    public function actionView($id)
+    public function actionView($FKid_user, $FKid_session)
     {
         return $this->render('view', [
-            'model' => $this->findModel($id),
+            'model' => $this->findModel($FKid_user, $FKid_session),
         ]);
     }
 
     /**
-     * Creates a new Genres model.
+     * Creates a new Participate model.
      * If creation is successful, the browser will be redirected to the 'view' page.
      * @return string|\yii\web\Response
      */
     public function actionCreate()
     {
-        $model = new Genres();
+        $model = new Participate();
 
         if ($this->request->isPost) {
             if ($model->load($this->request->post()) && $model->save()) {
-                return $this->redirect(['view', 'id' => $model->id_genre]);
+                return $this->redirect(['view', 'FKid_user' => $model->FKid_user, 'FKid_session' => $model->FKid_session]);
             }
         } else {
             $model->loadDefaultValues();
@@ -97,18 +84,19 @@ class GenreController extends Controller
     }
 
     /**
-     * Updates an existing Genres model.
+     * Updates an existing Participate model.
      * If update is successful, the browser will be redirected to the 'view' page.
-     * @param int $id ID
+     * @param int $FKid_user F Kid User
+     * @param int $FKid_session F Kid Session
      * @return string|\yii\web\Response
      * @throws NotFoundHttpException if the model cannot be found
      */
-    public function actionUpdate($id)
+    public function actionUpdate($FKid_user, $FKid_session)
     {
-        $model = $this->findModel($id);
+        $model = $this->findModel($FKid_user, $FKid_session);
 
         if ($this->request->isPost && $model->load($this->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->id_genre]);
+            return $this->redirect(['view', 'FKid_user' => $model->FKid_user, 'FKid_session' => $model->FKid_session]);
         }
 
         return $this->render('update', [
@@ -117,29 +105,31 @@ class GenreController extends Controller
     }
 
     /**
-     * Deletes an existing Genres model.
+     * Deletes an existing Participate model.
      * If deletion is successful, the browser will be redirected to the 'index' page.
-     * @param int $id ID
+     * @param int $FKid_user F Kid User
+     * @param int $FKid_session F Kid Session
      * @return \yii\web\Response
      * @throws NotFoundHttpException if the model cannot be found
      */
-    public function actionDelete($id)
+    public function actionDelete($FKid_user, $FKid_session)
     {
-        $this->findModel($id)->delete();
+        $this->findModel($FKid_user, $FKid_session)->delete();
 
         return $this->redirect(['index']);
     }
 
     /**
-     * Finds the Genres model based on its primary key value.
+     * Finds the Participate model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
-     * @param int $id ID
-     * @return Genres the loaded model
+     * @param int $FKid_user F Kid User
+     * @param int $FKid_session F Kid Session
+     * @return Participate the loaded model
      * @throws NotFoundHttpException if the model cannot be found
      */
-    protected function findModel($id)
+    protected function findModel($FKid_user, $FKid_session)
     {
-        if (($model = Genres::findOne(['id_genre' => $id])) !== null) {
+        if (($model = Participate::findOne(['FKid_user' => $FKid_user, 'FKid_session' => $FKid_session])) !== null) {
             return $model;
         }
 

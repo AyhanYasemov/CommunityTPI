@@ -4,11 +4,11 @@ use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 
 /** @var yii\web\View $this */
-/** @var app\models\PlatformsSearch $model */
+/** @var app\models\PreferenceSearch $model */
 /** @var yii\widgets\ActiveForm $form */
 ?>
 
-<div class="platforms-search">
+<div class="preference-search">
 
     <?php $form = ActiveForm::begin([
         'action' => ['index'],
@@ -18,9 +18,15 @@ use yii\widgets\ActiveForm;
         ],
     ]); ?>
 
-    <?= $form->field($model, 'id_platform') ?>
+    <?= $form->field($model, 'id_preference') ?>
 
-    <?= $form->field($model, 'name') ?>
+    <?= $form->field($model, 'FKid_user') ?>
+
+    <?= $form->field($model, 'FKid_game') ?>
+
+    <?= $form->field($model, 'FKid_genre') ?>
+
+    <?= $form->field($model, 'level') ?>
 
     <div class="form-group">
         <?= Html::submitButton('Search', ['class' => 'btn btn-primary']) ?>

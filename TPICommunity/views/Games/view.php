@@ -34,11 +34,11 @@ $this->params['breadcrumbs'][] = $this->title;
             'name', // Mise à jour du champ gameName en name
             [
                 'label' => 'Genre',
-                'value' => $model->genre ? implode(', ', array_map(function($genre) { return $genre->name; }, $model->genres)) : 'N/A',
+                'value' => $model->genres ? implode(', ', array_map(function($genres) { return $genres->name; }, $model->genres)) : 'N/A',
             ],
             [
                 'label' => 'Platform',
-                'value' => $model->platform ? implode(', ', array_map(function($platform) { return $platform->name; }, $model->platforms)) : 'N/A',
+                'value' => $model->platforms ? implode(', ', array_map(function($platforms) { return $platforms->name; }, $model->platforms)) : 'N/A',
             ],
         ],
     ]) ?>

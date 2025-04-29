@@ -2,18 +2,16 @@
 
 namespace app\controllers;
 
-use app\models\Genres;
-use app\models\GenreSearch;
+use app\models\Preference;
+use app\models\PreferenceSearch;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
-use yii\filters\AccessControl;
-use Yii;
 
 /**
- * GenreController implements the CRUD actions for Genres model.
+ * PreferenceController implements the CRUD actions for Preference model.
  */
-class GenreController extends Controller
+class PreferenceController extends Controller
 {
     /**
      * @inheritDoc
@@ -23,20 +21,8 @@ class GenreController extends Controller
         return array_merge(
             parent::behaviors(),
             [
-                'access' => [
-                    'class' => AccessControl::class,
-                    'rules' => [
-                        [
-                            'allow' => true,
-                            'roles' => ['@'],
-                            'matchCallback' => function ($rule, $action) {
-                                return Yii::$app->user->identity->type === 'admin';
-                            },
-                        ],
-                    ],
-                ],
                 'verbs' => [
-                    'class' => VerbFilter::class,
+                    'class' => VerbFilter::className(),
                     'actions' => [
                         'delete' => ['POST'],
                     ],
@@ -46,13 +32,13 @@ class GenreController extends Controller
     }
 
     /**
-     * Lists all Genres models.
+     * Lists all Preference models.
      *
      * @return string
      */
     public function actionIndex()
     {
-        $searchModel = new GenreSearch();
+        $searchModel = new PreferenceSearch();
         $dataProvider = $searchModel->search($this->request->queryParams);
 
         return $this->render('index', [
@@ -62,30 +48,30 @@ class GenreController extends Controller
     }
 
     /**
-     * Displays a single Genres model.
-     * @param int $id ID
+     * Displays a single Preference model.
+     * @param int $id_preference Id Preference
      * @return string
      * @throws NotFoundHttpException if the model cannot be found
      */
-    public function actionView($id)
+    public function actionView($id_preference)
     {
         return $this->render('view', [
-            'model' => $this->findModel($id),
+            'model' => $this->findModel($id_preference),
         ]);
     }
 
     /**
-     * Creates a new Genres model.
+     * Creates a new Preference model.
      * If creation is successful, the browser will be redirected to the 'view' page.
      * @return string|\yii\web\Response
      */
     public function actionCreate()
     {
-        $model = new Genres();
+        $model = new Preference();
 
         if ($this->request->isPost) {
             if ($model->load($this->request->post()) && $model->save()) {
-                return $this->redirect(['view', 'id' => $model->id_genre]);
+                return $this->redirect(['view', 'id_preference' => $model->id_preference]);
             }
         } else {
             $model->loadDefaultValues();
@@ -97,18 +83,18 @@ class GenreController extends Controller
     }
 
     /**
-     * Updates an existing Genres model.
+     * Updates an existing Preference model.
      * If update is successful, the browser will be redirected to the 'view' page.
-     * @param int $id ID
+     * @param int $id_preference Id Preference
      * @return string|\yii\web\Response
      * @throws NotFoundHttpException if the model cannot be found
      */
-    public function actionUpdate($id)
+    public function actionUpdate($id_preference)
     {
-        $model = $this->findModel($id);
+        $model = $this->findModel($id_preference);
 
         if ($this->request->isPost && $model->load($this->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->id_genre]);
+            return $this->redirect(['view', 'id_preference' => $model->id_preference]);
         }
 
         return $this->render('update', [
@@ -117,29 +103,29 @@ class GenreController extends Controller
     }
 
     /**
-     * Deletes an existing Genres model.
+     * Deletes an existing Preference model.
      * If deletion is successful, the browser will be redirected to the 'index' page.
-     * @param int $id ID
+     * @param int $id_preference Id Preference
      * @return \yii\web\Response
      * @throws NotFoundHttpException if the model cannot be found
      */
-    public function actionDelete($id)
+    public function actionDelete($id_preference)
     {
-        $this->findModel($id)->delete();
+        $this->findModel($id_preference)->delete();
 
         return $this->redirect(['index']);
     }
 
     /**
-     * Finds the Genres model based on its primary key value.
+     * Finds the Preference model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
-     * @param int $id ID
-     * @return Genres the loaded model
+     * @param int $id_preference Id Preference
+     * @return Preference the loaded model
      * @throws NotFoundHttpException if the model cannot be found
      */
-    protected function findModel($id)
+    protected function findModel($id_preference)
     {
-        if (($model = Genres::findOne(['id_genre' => $id])) !== null) {
+        if (($model = Preference::findOne(['id_preference' => $id_preference])) !== null) {
             return $model;
         }
 

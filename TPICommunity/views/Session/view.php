@@ -4,20 +4,20 @@ use yii\helpers\Html;
 use yii\widgets\DetailView;
 
 /** @var yii\web\View $this */
-/** @var app\models\Platforms $model */
+/** @var app\models\Session $model */
 
 $this->title = $model->name;
-$this->params['breadcrumbs'][] = ['label' => 'Platforms', 'url' => ['index']];
+$this->params['breadcrumbs'][] = ['label' => 'Sessions', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 \yii\web\YiiAsset::register($this);
 ?>
-<div class="platforms-view">
+<div class="session-view">
 
     <h1><?= Html::encode($this->title) ?></h1>
 
     <p>
-        <?= Html::a('Update', ['update', 'id' => $model->id_platform], ['class' => 'btn btn-primary']) ?>
-        <?= Html::a('Delete', ['delete', 'id' => $model->id_platform], [
+        <?= Html::a('Update', ['update', 'id_session' => $model->id_session], ['class' => 'btn btn-primary']) ?>
+        <?= Html::a('Delete', ['delete', 'id_session' => $model->id_session], [
             'class' => 'btn btn-danger',
             'data' => [
                 'confirm' => 'Are you sure you want to delete this item?',
@@ -29,8 +29,13 @@ $this->params['breadcrumbs'][] = $this->title;
     <?= DetailView::widget([
         'model' => $model,
         'attributes' => [
-            'id_platform',
+            'id_session',
+            'start_date',
+            'end_date',
+            'status',
+            'FKid_host',
             'name',
+            'FKid_game',
         ],
     ]) ?>
 

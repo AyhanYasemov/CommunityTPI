@@ -173,11 +173,83 @@ class GamesController extends Controller
 
             if (!$userHaveGame->save()) {
                 Yii::$app->session->setFlash('error', 'There was an issue adding a game to your library.');
-                return $this->redirect(['games/index']);
+                return $this->redirect(['games/catalogue']);
             }
         }
 
         Yii::$app->session->setFlash('success', 'Your game library has been updated!');
-        return $this->redirect(['games/index']);
+        return $this->redirect(['user/profile']);
+    }
+
+
+    public function actionRemoveFromLibrary($id)
+    {
+        $userId = Yii::$app->user->id;
+
+        // Trouver et supprimer la relation entre l'utilisateur et le jeu
+        $ownRecord = \app\models\Own::find()
+            ->where(['FKid_user' => $userId, 'FKid_game' => $id])
+            ->one();
+
+        if ($ownRecord) {
+            if ($ownRecord->delete()) {
+                Yii::$app->session->setFlash('success', 'Game successfully removed from your library.');
+            } else {
+                Yii::$app->session->setFlash('error', 'Failed to remove the game from your library.');
+            }
+        } else {
+            Yii::$app->session->setFlash('warning', 'The game was not found in your library.');
+        }
+
+        return $this->redirect(['user/profile']); // Redirige vers la page de profil ou catalogue
+    }
+
+
+    // Ajout d’un seul jeu depuis un bouton (catalogue)
+    public function actionAddSingleToLibrary($id)
+    {
+        $userId = Yii::$app->user->id;
+
+        // Vérifie si le jeu est déjà dans la bibliothèque
+        $alreadyExists = \app\models\Own::find()
+            ->where(['FKid_user' => $userId, 'FKid_game' => $id])
+            ->exists();
+
+        if ($alreadyExists) {
+            Yii::$app->session->setFlash('warning', 'This game is already in your library.');
+        } else {
+            $own = new \app\models\Own();
+            $own->FKid_user = $userId;
+            $own->FKid_game = $id;
+
+            if ($own->save()) {
+                Yii::$app->session->setFlash('success', 'Game successfully added to your library.');
+            } else {
+                Yii::$app->session->setFlash('error', 'Failed to add the game to your library.');
+            }
+        }
+
+        return $this->redirect(['games/catalogue']);
+    }
+
+    public function actionCatalogue()
+    {
+        $userId = Yii::$app->user->id;
+
+        $subQuery = (new \yii\db\Query())
+            ->select('FKid_game')
+            ->from('own')
+            ->where(['FKid_user' => $userId]);
+
+        $searchModel = new \app\models\GameSearch();
+        $dataProvider = new \yii\data\ActiveDataProvider([
+            'query' => \app\models\Games::find()->where(['not in', 'id_game', $subQuery]),
+        ]);
+
+        return $this->render('index', [
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider,
+            'catalogueMode' => true,
+        ]);
     }
 }

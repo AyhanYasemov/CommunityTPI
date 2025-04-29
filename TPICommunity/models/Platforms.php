@@ -38,7 +38,7 @@ class Platforms extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'id_platform' => 'ID', // Modifie ici pour 'id_platform'
+            'id_platform' => 'ID platform',
             'name' => 'Platform Name',
         ];
     }
@@ -51,8 +51,8 @@ class Platforms extends \yii\db\ActiveRecord
      */
     public function getGames()
     {
-        return $this->hasMany(Games::class, ['id' => 'game_id'])
-                    ->viaTable('game_platform', ['platform_id' => 'id']);
+        return $this->hasMany(Games::class, ['id_game' => 'FKid_game'])
+                    ->viaTable('game_platform', ['FKid_platform' => 'id_platform']);
     }
 }
 ?>

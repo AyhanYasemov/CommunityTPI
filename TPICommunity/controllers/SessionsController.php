@@ -3,7 +3,7 @@
 namespace app\controllers;
 
 use Yii;
-use app\models\Sessions;
+use app\models\Session;
 use app\models\SessionsSearch;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
@@ -69,7 +69,7 @@ class SessionsController extends Controller
      */
     public function actionCreate()
     {
-        $model = new Sessions();
+        $model = new Session();
 
         if ($this->request->isPost) {
             if ($model->load($this->request->post()) && $model->save()) {
@@ -127,7 +127,7 @@ class SessionsController extends Controller
      */
     protected function findModel($id)
     {
-        if (($model = Sessions::findOne(['id' => $id])) !== null) {
+        if (($model = Session::findOne(['id' => $id])) !== null) {
             return $model;
         }
 

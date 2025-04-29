@@ -4,12 +4,12 @@ namespace app\models;
 
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
-use app\models\Platforms;
+use app\models\Participate;
 
 /**
- * PlatformsSearch represents the model behind the search form of `app\models\Platforms`.
+ * ParticipateSearch represents the model behind the search form of `app\models\Participate`.
  */
-class PlatformsSearch extends Platforms
+class ParticipateSearch extends Participate
 {
     /**
      * {@inheritdoc}
@@ -17,21 +17,30 @@ class PlatformsSearch extends Platforms
     public function rules()
     {
         return [
-            [['id_platform'], 'integer'], 
-            [['name'], 'safe'],
+            [['FKid_user', 'FKid_session'], 'integer'],
         ];
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function scenarios()
+    {
+        // bypass scenarios() implementation in the parent class
+        return Model::scenarios();
     }
 
     /**
      * Creates data provider instance with search query applied
      *
      * @param array $params
+     * @param string|null $formName Form name to be used into `->load()` method.
      *
      * @return ActiveDataProvider
      */
-    public function search($params)
+    public function search($params, $formName = null)
     {
-        $query = Platforms::find();
+        $query = Participate::find();
 
         // add conditions that should always apply here
 
@@ -39,7 +48,7 @@ class PlatformsSearch extends Platforms
             'query' => $query,
         ]);
 
-        $this->load($params);
+        $this->load($params, $formName);
 
         if (!$this->validate()) {
             // uncomment the following line if you do not want to return any records when validation fails
@@ -49,10 +58,9 @@ class PlatformsSearch extends Platforms
 
         // grid filtering conditions
         $query->andFilterWhere([
-            'id_platform' => $this->id_platform,
+            'FKid_user' => $this->FKid_user,
+            'FKid_session' => $this->FKid_session,
         ]);
-
-        $query->andFilterWhere(['like', 'name', $this->name]); 
 
         return $dataProvider;
     }

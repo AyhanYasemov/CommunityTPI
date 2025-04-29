@@ -5,9 +5,9 @@ use yii\helpers\Html;
 /** @var yii\web\View $this */
 /** @var app\models\Platforms $model */
 
-$this->title = 'Update Platforms: ' . $model->platformName;
+$this->title = 'Update Platforms: ' . $model->id_platform;
 $this->params['breadcrumbs'][] = ['label' => 'Platforms', 'url' => ['index']];
-$this->params['breadcrumbs'][] = ['label' => $model->platformName, 'url' => ['view', 'id' => $model->id]];
+$this->params['breadcrumbs'][] = ['label' => $model->id_platform, 'url' => ['view', 'id' => $model->id_platform]];
 $this->params['breadcrumbs'][] = 'Update';
 ?>
 <div class="platforms-update">

@@ -89,7 +89,7 @@ class Games extends \yii\db\ActiveRecord
      */
     public function getSessions()
     {
-        return $this->hasMany(Sessions::class, ['FKid_game' => 'id_game']);
+        return $this->hasMany(Session::class, ['FKid_game' => 'id_game']);
     }
 
     /**

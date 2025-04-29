@@ -12,8 +12,11 @@ use yii\helpers\ArrayHelper;
 /** @var yii\web\View $this */
 /** @var app\models\GameSearch $searchModel */
 /** @var yii\data\ActiveDataProvider $dataProvider */
+/** @var bool $catalogueMode */
 
-$this->title = 'Bibliothèque de jeux';
+$catalogueMode = $catalogueMode ?? false;
+
+$this->title = $catalogueMode ?? false ? 'Catalogue des jeux' : 'Liste des jeux';
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="games-index">
@@ -28,32 +31,23 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <?php Pjax::begin(); ?>
 
-    <?php // Affichage des jeux avec cases à cocher 
-    ?>
-    <h3>Choisissez les jeux que vous possédez</h3>
-    <?= Html::beginForm(['games/add-to-library'], 'post') ?>
 
-    <?= Html::checkboxList(
-        'games',
-        ArrayHelper::getColumn(\app\models\Own::find()->where(['FKid_user' => Yii::$app->user->id])->all(), 'FKid_game'), // Les jeux que l'utilisateur possède déjà
-        ArrayHelper::map(Games::find()->all(), 'id_game', 'name') // Liste de tous les jeux
-    ) ?>
-
-    <div class="form-group">
-        <?= Html::submitButton('Sauvegarder dans votre bibliothèque', ['class' => 'btn btn-success']) ?>
-    </div>
-
-    <?= Html::endForm(); ?>
 
     <?php // Affichage de la liste des jeux pour l'admin 
     ?>
+
+    <?php if (!empty($catalogueMode)): ?>
+        <p>Jeux que vous pouvez ajouter à votre bibliothèque :</p>
+    <?php endif; ?>
+
+
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
         'columns' => [
             ['class' => 'yii\grid\SerialColumn'],
             [
-                'attribute' => 'release_date',  
+                'attribute' => 'release_date',
                 'label' => 'Date de sortie',
             ],
             [
@@ -66,7 +60,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'attribute' => 'fkGenre_id',  // Relation avec la table GAME_GENRE
                 'label' => 'Genres',
                 'value' => function ($model) {
-                    $genres = ArrayHelper::getColumn($model->genres, 'name');  
+                    $genres = ArrayHelper::getColumn($model->genres, 'name');
                     return !empty($genres) ? implode(', ', $genres) : 'Aucun';
                 },
             ],
@@ -76,7 +70,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'attribute' => 'fkPlatform_id',  // Relation avec la table GAME_PLATFORM
                 'label' => 'Plateformes',
                 'value' => function ($model) {
-                    $platforms = ArrayHelper::getColumn($model->platforms, 'name');  
+                    $platforms = ArrayHelper::getColumn($model->platforms, 'name');
                     return !empty($platforms) ? implode(', ', $platforms) : 'Aucune';
                 },
             ],
@@ -84,10 +78,24 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'class' => ActionColumn::className(),
                 'urlCreator' => function ($action, Games $model, $key, $index, $column) {
-                    return Url::toRoute([$action, 'id' => $model->id_game]);  
+                    return Url::toRoute([$action, 'id' => $model->id_game]);
                 },
                 'visible' => Yii::$app->user->identity->type === 'admin', // visible seulement par les administrateurs
             ],
+
+            [
+                'class' => 'yii\grid\ActionColumn',
+                'template' => $catalogueMode ? '{add}' : '{view} {update} {delete}',
+                'buttons' => [
+                    'add' => function ($url, $model) {
+                        return Html::a('Ajouter', ['games/add-single-to-library', 'id' => $model->id_game], [
+                            'class' => 'btn btn-success btn-sm',
+                            'data' => ['method' => 'post'],
+                        ]);
+                    },
+                ],
+            ],
+            
         ],
     ]); ?>
 

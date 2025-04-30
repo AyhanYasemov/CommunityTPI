@@ -7,7 +7,9 @@ use Yii;
 use yii\web\Controller;
 use yii\filters\AccessControl;
 use yii\data\ActiveDataProvider;
+use yii\db\Expression;
 use app\models\User;
+use app\models\Availability;
 
 class UserController extends Controller
 {
@@ -31,9 +33,15 @@ class UserController extends Controller
      * Page de profil de l'utilisateur
      */
     public function actionProfile()
-    {
-        $user = User::findOne(Yii::$app->user->id);
+    {   // Avant qu'on fasse appel aux providers, on vérifie les disponibilités dans la base de données et supprime les échues
+        // Purge des disponiblités expirées avant de charger les providers
+        Availability::deleteAll([
+            '<', 'end_date',
+            new Expression('NOW()')
+        ]);
 
+        // 2) Ensuite, on récupère l’utilisateur et on construit ses providers
+        $user = User::findOne(Yii::$app->user->id);
         $ownProvider = new ActiveDataProvider([
             'query' => $user->getOwnGames(),
             'pagination' => ['pageSize' => 10],
@@ -58,21 +66,17 @@ class UserController extends Controller
     }
 
     public function actionAddToLibrary($gameId)
-{
-    $user = User::findOne(Yii::$app->user->id);
-    $game = Games::findOne($gameId);
+    {
+        $user = User::findOne(Yii::$app->user->id);
+        $game = Games::findOne($gameId);
 
-    if ($user && $game) {
-        $user->link('games', $game);  // Lier le jeu à l'utilisateur
-        Yii::$app->session->setFlash('success', 'Jeu ajouté à votre bibliothèque.');
-    } else {
-        Yii::$app->session->setFlash('error', 'Impossible d\'ajouter ce jeu.');
+        if ($user && $game) {
+            $user->link('games', $game);  // Lier le jeu à l'utilisateur
+            Yii::$app->session->setFlash('success', 'Jeu ajouté à votre bibliothèque.');
+        } else {
+            Yii::$app->session->setFlash('error', 'Impossible d\'ajouter ce jeu.');
+        }
+
+        return $this->redirect(['profile']);
     }
-
-    return $this->redirect(['profile']);
 }
-
-}
-
-
-

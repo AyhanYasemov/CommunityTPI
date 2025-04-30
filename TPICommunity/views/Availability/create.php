@@ -1,20 +1,18 @@
 <?php
-
 use yii\helpers\Html;
+use yii\widgets\ActiveForm;
 
-/** @var yii\web\View $this */
-/** @var app\models\Availability $model */
-
-$this->title = 'Créer une disponibilité';
-$this->params['breadcrumbs'][] = ['label' => 'Mes Disponibilités', 'url' => ['index']];
-$this->params['breadcrumbs'][] = $this->title;
+/* @var $model app\models\Availability */
 ?>
-<div class="availability-create">
 
-    <h1><?= Html::encode($this->title) ?></h1>
+<div class="availability-form">
+<?php $form = ActiveForm::begin([
+    'action' => ['availability/create'],
+    'enableClientValidation' => true,
+]); ?>
+    <?= $form->field($model, 'start_date')->input('datetime-local', ['step' => 60]) ?>
+    <?= $form->field($model, 'end_date')->input('datetime-local', ['step' => 60]) ?>
 
-    <?= $this->render('_form', [
-        'model' => $model,
-    ]) ?>
-
+    <?= Html::submitButton('Sauvegarder', ['class' => 'btn btn-success']) ?>
+    <?php ActiveForm::end(); ?>
 </div>

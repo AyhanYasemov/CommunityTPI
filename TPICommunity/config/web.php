@@ -26,6 +26,12 @@ $config = [
         'errorHandler' => [
             'errorAction' => 'site/error',
         ],
+
+        
+
+
+        'bootstrap' => ['log', 'bootstrap4'],
+
         'mailer' => [
             'class' => 'yii\swiftmailer\Mailer',
             // send all mails to a file by default. You have to set
@@ -47,9 +53,21 @@ $config = [
         'urlManager' => [
             'enablePrettyUrl' => true,
             'showScriptName' => false,
-            'rules' => [
+            'rules' => [],
+        ],
 
-            ],
+
+    ],
+
+    'modules' => [
+        'gridview' => [
+            'class' => '\kartik\grid\Module',
+            'bsVersion' => '4.x', // force Bootstrap 4 pour tous les widgets Kartik
+        ],
+
+        'select2' => [
+            'class' => '\kartik\select2\Module',
+            'bsVersion' => '4.x',
         ],
     ],
     'params' => $params,

@@ -2,130 +2,107 @@
 
 namespace app\controllers;
 
+use Yii;
 use app\models\Availability;
 use app\models\AvailabilitySearch;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
-use Yii;
 
-/**
- * AvailabilityController implements the CRUD actions for Availability model.
- */
 class AvailabilityController extends Controller
 {
-    /**
-     * @inheritDoc
-     */
     public function behaviors()
     {
-        return array_merge(
-            parent::behaviors(),
-            [
-                'verbs' => [
-                    'class' => VerbFilter::className(),
-                    'actions' => [
-                        'delete' => ['POST'],
-                    ],
+        return [
+            'verbs' => [
+                'class'   => VerbFilter::class,
+                'actions' => [
+                    'delete' => ['POST'],
+                    'quick'  => ['POST'],  // <-- on force POST
                 ],
-            ]
-        );
+            ],
+        ];
     }
 
-    /**
-     * Lists all Availability models.
-     *
-     * @return string
-     */
-    public function actionIndex()
-    {
-        $searchModel = new AvailabilitySearch();
-        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
-    
-        return $this->render('index', [
-            'searchModel' => $searchModel,
-            'dataProvider' => $dataProvider,
-        ]);
-    }
-
-    /**
-     * Displays a single Availability model.
-     * @param int $id ID
-     * @return string
-     * @throws NotFoundHttpException if the model cannot be found
-     */
-    public function actionView($id)
-    {
-        return $this->render('view', [
-            'model' => $this->findModel($id),
-        ]);
-    }
-
-    /**
-     * Creates a new Availability model.
-     * If creation is successful, the browser will be redirected to the 'view' page.
-     * @return string|\yii\web\Response
-     */
+    // Création de la disponibilité (en modal )
     public function actionCreate()
     {
         $model = new Availability();
-        $model->user_id = Yii::$app->user->id; // Associe l'utilisateur connecté
+        if ($model->load(Yii::$app->request->post())) {
+            if ($model->save()) {
+                Yii::$app->session->setFlash('success', 'Disponibilité ajoutée.');
 
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            Yii::$app->session->setFlash('success', 'Disponibilité ajoutée avec succès.');
-            return $this->redirect(['index']);
+                // Si c'est une requête AJAX, renvoyer un succès
+                if (Yii::$app->request->isAjax) {
+                    return \yii\helpers\Json::encode(['status' => 'success']);
+                }
+
+                // Sinon, redirige vers la page de profil
+                return $this->redirect(['user/profile']);
+            } else {
+                // Si sauvegarde échoue, renvoyer les erreurs via AJAX
+                if (Yii::$app->request->isAjax) {
+                    return \yii\helpers\Json::encode(['status' => 'error', 'errors' => $model->errors]);
+                }
+            }
         }
 
-        return $this->render('create', ['model' => $model]);
+        // Retourner le formulaire pour une demande AJAX
+        return $this->renderAjax('create', ['model' => $model]);
     }
 
     /**
-     * Updates an existing Availability model.
-     * If update is successful, the browser will be redirected to the 'view' page.
-     * @param int $id ID
-     * @return string|\yii\web\Response
-     * @throws NotFoundHttpException if the model cannot be found
+     * Crée une disponibilité de maintenant à maintenant+2h
      */
-    public function actionUpdate($id)
+    public function actionQuick()
     {
-        $model = $this->findModel($id);
+        $userId = Yii::$app->user->id;
+        $now    = new \DateTime();
+        $end    = (clone $now)->add(new \DateInterval('PT2H'));
 
-        if ($this->request->isPost && $model->load($this->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->id]);
+        $model = new Availability([
+            'start_date' => $now->format('Y-m-d H:i:00'),
+            'end_date'   => $end->format('Y-m-d H:i:00'),
+            'FKid_user'  => $userId,
+        ]);
+
+        if ($model->save()) {
+            //Yii::$app->session->setFlash('success', 'Ta disponibilité immédiate a bien été ajoutée.');
+            Yii::$app->session->setFlash('error', 'Erreur : ' . json_encode($model->getErrors()));
+
+        } else {
+            Yii::$app->session->setFlash('error', 'Impossible de créer la disponibilité immédiate.');
         }
 
-        return $this->render('update', [
-            'model' => $model,
-        ]);
+        return $this->redirect(['user/profile']);
     }
 
-    /**
-     * Deletes an existing Availability model.
-     * If deletion is successful, the browser will be redirected to the 'index' page.
-     * @param int $id ID
-     * @return \yii\web\Response
-     * @throws NotFoundHttpException if the model cannot be found
-     */
+
+    // Suppression de la disponibilité
     public function actionDelete($id)
     {
-        $this->findModel($id)->delete();
+        // Appel à la méthode findModel pour récupérer le modèle
+        $model = $this->findModel($id);
 
-        return $this->redirect(['index']);
-    }
-
-    /**
-     * Finds the Availability model based on its primary key value.
-     * If the model is not found, a 404 HTTP exception will be thrown.
-     * @param int $id ID
-     * @return Availability the loaded model
-     * @throws NotFoundHttpException if the model cannot be found
-     */
-    protected function findModel($id)
-    {
-        if (($model = Availability::findOne(['id' => $id])) !== null) {
-            return $model;
+        if ($model !== null) {
+            // Si le modèle est trouvé, on le supprime
+            $model->delete();
+            Yii::$app->session->setFlash('success', 'Disponibilité supprimée.');
         }
 
-        throw new NotFoundHttpException('The requested page does not exist.');
+        // Redirection vers la page de profil après la suppression (ou en cas d'absence de modèle)
+        return $this->redirect(['user/profile']);
+    }
+
+    protected function findModel($id)
+    {
+        // Vérification si l'objet existe bien avant de tenter de l'utiliser
+        $model = Availability::findOne(['id_availability' => $id]);
+
+        if ($model === null) {
+            Yii::$app->session->setFlash('error', 'Disponibilité introuvable.');
+            return null; // Retourne null si le modèle n'est pas trouvé
+        }
+        return $model;
     }
 }

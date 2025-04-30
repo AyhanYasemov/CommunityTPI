@@ -29,7 +29,7 @@ class Games extends \yii\db\ActiveRecord
      */
     public static function tableName()
     {
-        return 'game'; // Assurez-vous que le nom de la table est bien 'game'
+        return 'game'; 
     }
 
     /**
@@ -55,8 +55,10 @@ class Games extends \yii\db\ActiveRecord
     {
         return [
             'id_game' => 'ID',
-            'name' => 'Game Name',
-            'release_date' => 'Release Date',
+            'name' => 'Titre',
+            'release_date' => 'Date de sortie',
+            'fkGenre_id' => 'Genres du jeu',
+            'fkPlatform_id' => 'Platformes de jeu',
         ];
     }
 
@@ -126,19 +128,19 @@ public function afterSave($insert, $changedAttributes)
 
     // -- genres pivot --
     \app\models\GameGenre::deleteAll(['FKid_game' => $this->id_game]);
-    foreach ($this->fkGenre_id as $gId) {
+    foreach ($this->fkGenre_id as $genreId) {
         $pivot = new \app\models\GameGenre();
         $pivot->FKid_game  = $this->id_game;
-        $pivot->FKid_genre = $gId;
+        $pivot->FKid_genre = $genreId;
         $pivot->save(false);
     }
 
     // -- plateformes pivot --
     \app\models\GamePlatform::deleteAll(['FKid_game' => $this->id_game]);
-    foreach ($this->fkPlatform_id as $pId) {
+    foreach ($this->fkPlatform_id as $platformId) {
         $pivot = new \app\models\GamePlatform();
         $pivot->FKid_game      = $this->id_game;
-        $pivot->FKid_platform  = $pId;
+        $pivot->FKid_platform  = $platformId;
         $pivot->save(false);
     }
 }

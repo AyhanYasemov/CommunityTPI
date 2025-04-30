@@ -12,9 +12,15 @@ use yii\widgets\ActiveForm;
 
     <?php $form = ActiveForm::begin(); ?>
 
-    <?= $form->field($model, 'startTime')->input('datetime-local', ['step' => '60']) ?>
+    <?= $form->field($model, 'startTime')->input('datetime-local', [
+        'step' => '60',
+        'min'  => date('Y-m-d\TH:i'),   // heure actuelle, empêche le passé
+    ]) ?>
 
-<?= $form->field($model, 'endTime')->input('datetime-local', ['step' => '60']) ?>
+    <?= $form->field($model, 'endTime')->input('datetime-local', [
+        'step' => '60',
+        'min'  => date('Y-m-d\TH:i'),   // heure actuelle, empêche le passé
+    ]) ?>
 
     <!-- L'ID de l'utilisateur est rempli automatiquement par le modèle -->
     <?= $form->field($model, 'user_id')->hiddenInput()->label(false) ?>

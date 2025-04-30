@@ -3,89 +3,59 @@
 namespace app\models;
 
 use Yii;
+use yii\db\ActiveRecord;
 
 /**
- * This is the model class for table "availability".
- *
- * @property int $id Primary Key
- * @property string|null $startTime
- * @property string|null $endTime
- * @property int|null $user_id
- *
- * @property Users $user
+ * @property int $id_availability
+ * @property int $FKid_user
+ * @property string $start_date
+ * @property string $end_date
  */
-class Availability extends \yii\db\ActiveRecord
+class Availability extends ActiveRecord
 {
-    /**
-     * {@inheritdoc}
-     */
     public static function tableName()
     {
         return 'availability';
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function rules()
     {
         return [
-            [['startTime', 'endTime'], 'required'],
-            [['startTime', 'endTime'], 'safe'],
-            [['user_id'], 'integer'],
-            ['user_id', 'default', 'value' => Yii::$app->user->id],  // L'utilisateur connecté est automatiquement associé à cette disponibilité
+            [['start_date', 'end_date'], 'required'],
+            [['start_date', 'end_date'], 'safe'],
+            ['end_date', 'compare', 'compareAttribute' => 'start_date', 'operator' => '>', 'type' => 'datetime'],
+            ['end_date', function ($attribute, $params, $validator) {
+                if (strtotime($this->$attribute) < time()) {
+                    $this->addError($attribute, 'La date de fin doit être dans le futur.');
+                }
+            }],
+
+            ['FKid_user', 'integer'],
+            ['FKid_user', 'default', 'value' => Yii::$app->user->id],
         ];
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function attributeLabels()
     {
         return [
-            'startTime' => 'Heure de début',
-            'endTime' => 'Heure de fin',
-            'user_id' => 'Utilisateur',  // Ajout du label pour l'ID utilisateur
+            'id_availability' => 'ID',
+            'start_date'      => 'Date et heure de début',
+            'end_date'        => 'Date et heure de fin',
         ];
     }
 
-    /**
-     * Relation avec le modèle User
-     * 
-     * @return \yii\db\ActiveQuery
-     */
     public function getUser()
     {
-        return $this->hasOne(User::class, ['id' => 'user_id']);
-    }
-
-    /**
-     * Fonction pour rechercher les disponibilités de l'utilisateur connecté
-     * 
-     * @param array $params
-     * @return \yii\data\ActiveDataProvider
-     */
-    public function search($params)
-    {
-        $query = Availability::find()->where(['user_id' => Yii::$app->user->id]); // Filtre par utilisateur connecté
-
-        $dataProvider = new \yii\data\ActiveDataProvider([
-            'query' => $query,
-        ]);
-
-        $this->load($params);
-
-        return $dataProvider;
+        return $this->hasOne(User::class, ['id_user' => 'FKid_user']);
     }
 
     public function beforeSave($insert)
     {
-        if (parent::beforeSave($insert)) {
-            // Supprime les secondes en formatant l'entrée
-            $this->startTime = date('Y-m-d H:i:00', strtotime($this->startTime));
-            $this->endTime = date('Y-m-d H:i:00', strtotime($this->endTime));
-            return true;
+        if (!parent::beforeSave($insert)) {
+            return false;
         }
-        return false;
+        $this->start_date = date('Y-m-d H:i:00', strtotime($this->start_date));
+        $this->end_date   = date('Y-m-d H:i:00', strtotime($this->end_date));
+        return true;
     }
 }

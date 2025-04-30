@@ -53,39 +53,35 @@ class GamesController extends Controller
         }
 
         $model = new Games();
-
-        if ($this->request->isPost) {
-            if ($model->load($this->request->post()) && $model->save()) {
-                // Ajouter les genres associés
-                $selectedGenres = Yii::$app->request->post('Game')['fkGenre_id'];
-                if ($selectedGenres) {
-                    foreach ($selectedGenres as $genreId) {
-                        $gameGenre = new \app\models\Genres();
-                        $gameGenre->FKid_game = $model->id_game;
-                        $gameGenre->FKid_genre = $genreId;
-                        $gameGenre->save();
-                    }
-                }
-
-                // Ajouter les plateformes associées
-                $selectedPlatforms = Yii::$app->request->post('Game')['fkPlatform_id'];
-                if ($selectedPlatforms) {
-                    foreach ($selectedPlatforms as $platformId) {
-                        $gamePlatform = new \app\models\Platforms();
-                        $gamePlatform->FKid_game = $model->id_game;
-                        $gamePlatform->FKid_platform = $platformId;
-                        $gamePlatform->save();
-                    }
-                }
-
-                return $this->redirect(['view', 'id' => $model->id_game]);
+        if ($model->load(Yii::$app->request->post()) && $model->save()) {
+            // on récupère vraiment les données postées
+            $post = Yii::$app->request->post('Games', []);
+            $selectedGenres    = $post['fkGenre_id']    ?? [];
+            $selectedPlatforms = $post['fkPlatform_id'] ?? [];
+    
+            // genres pivot
+            \app\models\GameGenre::deleteAll(['FKid_game' => $model->id_game]);
+            foreach ($selectedGenres as $gId) {
+                $pivot = new \app\models\GameGenre();
+                $pivot->FKid_game  = $model->id_game;
+                $pivot->FKid_genre = $gId;
+                $pivot->save(false);
             }
+    
+            // plateformes pivot
+            \app\models\GamePlatform::deleteAll(['FKid_game' => $model->id_game]);
+            foreach ($selectedPlatforms as $pId) {
+                $pivot = new \app\models\GamePlatform();
+                $pivot->FKid_game      = $model->id_game;
+                $pivot->FKid_platform  = $pId;
+                $pivot->save(false);
+            }
+    
+            return $this->redirect(['view', 'id' => $model->id_game]);
         }
-
-        return $this->render('create', [
-            'model' => $model,
-        ]);
+        return $this->render('create', ['model' => $model]);
     }
+    
 
     public function actionUpdate($id)
     {
@@ -95,32 +91,27 @@ class GamesController extends Controller
         }
 
         $model = $this->findModel($id);
-
-        if ($this->request->isPost && $model->load($this->request->post()) && $model->save()) {
-            // Mettre à jour les genres associés
-            $selectedGenres = Yii::$app->request->post('Game')['fkGenre_id'];
-            \app\models\Genres::deleteAll(['FKid_game' => $model->id_game]);
-            if ($selectedGenres) {
-                foreach ($selectedGenres as $genreId) {
-                    $gameGenre = new \app\models\Genres();
-                    $gameGenre->FKid_game = $model->id_game;
-                    $gameGenre->FKid_genre = $genreId;
-                    $gameGenre->save();
-                }
+        if ($model->load(Yii::$app->request->post()) && $model->save()) {
+            $post = Yii::$app->request->post('Games', []);
+            $selectedGenres    = $post['fkGenre_id']    ?? [];
+            $selectedPlatforms = $post['fkPlatform_id'] ?? [];
+    
+            \app\models\GameGenre::deleteAll(['FKid_game' => $model->id_game]);
+            foreach ($selectedGenres as $gId) {
+                $pivot = new \app\models\GameGenre();
+                $pivot->FKid_game  = $model->id_game;
+                $pivot->FKid_genre = $gId;
+                $pivot->save(false);
             }
-
-            // Mettre à jour les plateformes associées
-            $selectedPlatforms = Yii::$app->request->post('Game')['fkPlatform_id'];
-            \app\models\Platforms::deleteAll(['FKid_game' => $model->id_game]);
-            if ($selectedPlatforms) {
-                foreach ($selectedPlatforms as $platformId) {
-                    $gamePlatform = new \app\models\Platforms();
-                    $gamePlatform->FKid_game = $model->id_game;
-                    $gamePlatform->FKid_platform = $platformId;
-                    $gamePlatform->save();
-                }
+    
+            \app\models\GamePlatform::deleteAll(['FKid_game' => $model->id_game]);
+            foreach ($selectedPlatforms as $pId) {
+                $pivot = new \app\models\GamePlatform();
+                $pivot->FKid_game      = $model->id_game;
+                $pivot->FKid_platform  = $pId;
+                $pivot->save(false);
             }
-
+    
             return $this->redirect(['view', 'id' => $model->id_game]);
         }
 

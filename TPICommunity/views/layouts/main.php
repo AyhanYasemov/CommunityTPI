@@ -42,7 +42,7 @@ AppAsset::register($this);
                 ['label' => 'Page Principale', 'url' => ['/site/index']],
 
                 !Yii::$app->user->isGuest ? ['label' => 'Sessions', 'url' => ['/session/index']] : '',
-                !Yii::$app->user->isGuest ? ['label' => 'Disponibilités', 'url' => ['/availability/index']] : '',
+                !Yii::$app->user->isGuest ? ['label' => 'Liste des joueurs', 'url' => ['/availability/index']] : '',
                 !Yii::$app->user->isGuest && Yii::$app->user->identity->type !== 'USER' ? ['label' => '(Admin)Jeux', 'url' => ['/games/index']] : '',
                 !Yii::$app->user->isGuest && Yii::$app->user->identity->type !== 'USER' ? ['label' => '(Admin)Genre', 'url' => ['/genre/index']] : '',
                 !Yii::$app->user->isGuest && Yii::$app->user->identity->type !== 'USER' ? ['label' => '(Admin)Plateforme', 'url' => ['/platform/index']] : '',

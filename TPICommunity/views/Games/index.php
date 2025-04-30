@@ -75,13 +75,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 },
             ],
 
-            [
-                'class' => ActionColumn::className(),
-                'urlCreator' => function ($action, Games $model, $key, $index, $column) {
-                    return Url::toRoute([$action, 'id' => $model->id_game]);
-                },
-                'visible' => Yii::$app->user->identity->type === 'admin', // visible seulement par les administrateurs
-            ],
+
 
             [
                 'class' => 'yii\grid\ActionColumn',

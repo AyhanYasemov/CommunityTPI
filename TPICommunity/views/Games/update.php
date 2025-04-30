@@ -5,9 +5,9 @@ use yii\helpers\Html;
 /** @var yii\web\View $this */
 /** @var app\models\Games $model */
 
-$this->title = 'Mise a jour jeux: ' . $model->id;
+$this->title = 'Mise a jour jeux: ' . $model->id_game;
 $this->params['breadcrumbs'][] = ['label' => 'Games', 'url' => ['index']];
-$this->params['breadcrumbs'][] = ['label' => $model->id, 'url' => ['view', 'id' => $model->id]];
+$this->params['breadcrumbs'][] = ['label' => $model->id_game, 'url' => ['view', 'id' => $model->id_game]];
 $this->params['breadcrumbs'][] = 'Update';
 ?>
 <div class="games-update">

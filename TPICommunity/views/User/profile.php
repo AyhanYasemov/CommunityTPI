@@ -1,7 +1,13 @@
 <?php
+
+use app\models\Genres;
+use app\models\Platforms;
 use yii\helpers\Html;
 use yii\bootstrap4\Modal;
 use yii\grid\GridView;
+use kartik\select2\Select2;
+use yii\helpers\ArrayHelper;;
+use yii\widgets\ActiveForm;
 
 /* @var $this yii\web\View */
 /* @var $user app\models\User */
@@ -48,11 +54,11 @@ $this->params['breadcrumbs'][] = $this->title;
     <h2>Mes disponibilités</h2>
 
     <p class="mb-3">
-        <?= Html::beginForm(['availability/quick'], 'post', ['style'=>'display:inline']) ?>
-            <?= Html::submitButton('Ajouter une disponibilité immédiate', [
-                'class' => 'btn btn-warning',
-                'data'  => ['confirm' => 'Etes-vous disponible les deux prochaines heures ?']
-            ]) ?>
+        <?= Html::beginForm(['availability/quick'], 'post', ['style' => 'display:inline']) ?>
+        <?= Html::submitButton('Ajouter une disponibilité immédiate', [
+            'class' => 'btn btn-warning',
+            'data'  => ['confirm' => 'Etes-vous disponible les deux prochaines heures ?']
+        ]) ?>
         <?= Html::endForm() ?>
 
         <!-- Bouton modal existant -->
@@ -69,6 +75,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'model' => new \app\models\Availability()
         ]);
         Modal::end();
+
         ?>
     </p>
 
@@ -78,20 +85,20 @@ $this->params['breadcrumbs'][] = $this->title;
             ['class' => 'yii\grid\SerialColumn'],
             [
                 'attribute' => 'start_date',
-                'format'    => ['datetime','php:d/m/Y H:i']
+                'format'    => ['datetime', 'php:d/m/Y H:i']
             ],
             [
                 'attribute' => 'end_date',
-                'format'    => ['datetime','php:d/m/Y H:i']
+                'format'    => ['datetime', 'php:d/m/Y H:i']
             ],
             [
                 'class'      => 'yii\grid\ActionColumn',
                 'controller' => 'availability',
                 'template'   => '{delete}',
                 'buttons'    => [
-                    'delete' => function($url, $model, $key) {
-                        return Html::a('Supprimer', ['availability/delete','id'=>$model->id_availability], [
-                            'data'  => ['method'=>'post','confirm'=>'Supprimer cette disponibilité ?'],
+                    'delete' => function ($url, $model, $key) {
+                        return Html::a('Supprimer', ['availability/delete', 'id' => $model->id_availability], [
+                            'data'  => ['method' => 'post', 'confirm' => 'Supprimer cette disponibilité ?'],
                             'class' => 'btn btn-sm btn-danger'
                         ]);
                     }
@@ -103,25 +110,44 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <!-- Préférences -->
     <h2>Mes préférences</h2>
-    <?= GridView::widget([
-        'dataProvider' => $prefProvider,
-        'columns' => [
-            ['class' => 'yii\\grid\\SerialColumn'],
-            [
-                'label' => 'Genre',
-                'value' => function ($model) {
-                    return $model->genre->name;
-                },
-            ],
-            [
-                'label' => 'Jeu',
-                'value' => function ($model) {
-                    return $model->game->name;
-                },
-            ],
-            'level',
-            ['class' => 'yii\\grid\\ActionColumn', 'controller' => 'preference'],
-        ],
+
+    <?php $form = ActiveForm::begin([
+        'action' => ['user/update-preferences'],
+        'method' => 'post',
     ]); ?>
+
+    <?= $form->field($user, 'preferredGenreIds')->widget(Select2::class, [
+        'data' => ArrayHelper::map(Genres::find()->all(), 'id_genre', 'name'),
+        'options' => [
+            'multiple' => true,
+            'placeholder' => 'Sélectionnez vos genres…',
+            'value' => $user->getPreferredGenres()->select('id_genre')->column(),
+        ],
+        'pluginOptions' => [
+            'allowClear' => true,
+            'dropdownAutoWidth' => true,
+            'width'             => '100%',
+        ],
+    ]) ?>
+
+    <?= $form->field($user, 'preferredPlatformIds')->widget(Select2::class, [
+        'data' => ArrayHelper::map(Platforms::find()->all(), 'id_platform', 'name'),
+        'options' => [
+            'multiple' => true,
+            'placeholder' => 'Sélectionnez vos plateformes…',
+            'value' => $user->getPreferredPlatforms()->select('id_platform')->column(),
+        ],
+        'pluginOptions' => [
+            'allowClear' => true,
+            'dropdownAutoWidth' => true,
+            'width'             => '100%',
+        ],
+    ]) ?>
+
+    <div class="form-group">
+        <?= Html::submitButton('Enregistrer mes préférences', ['class' => 'btn btn-primary']) ?>
+    </div>
+
+    <?php ActiveForm::end(); ?>
 
 </div>

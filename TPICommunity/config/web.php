@@ -7,6 +7,7 @@ $config = [
     'id' => 'basic',
     'basePath' => dirname(__DIR__),
     'bootstrap' => ['log'],
+    'timeZone' => 'Europe/Paris',
     'aliases' => [
         '@bower' => '@vendor/bower-asset',
         '@npm'   => '@vendor/npm-asset',
@@ -27,8 +28,14 @@ $config = [
             'errorAction' => 'site/error',
         ],
 
-        
-
+        // nécéssaire afin de passer sur une heure européenne au lieu de l'UTC
+        'formatter' => [
+            'class'           => 'yii\i18n\Formatter',
+           
+            'defaultTimeZone' => 'Europe/Paris',
+            
+            'timeZone'        => 'Europe/Paris',
+        ],
 
         'bootstrap' => ['log', 'bootstrap4'],
 
@@ -44,7 +51,7 @@ $config = [
             'targets' => [
                 [
                     'class' => 'yii\log\FileTarget',
-                    'levels' => ['error', 'warning'],
+                    'levels' => ['error', 'warning', 'info'],
                 ],
             ],
         ],

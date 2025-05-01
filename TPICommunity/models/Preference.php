@@ -39,8 +39,8 @@ class Preference extends \yii\db\ActiveRecord
             [['FKid_user', 'level'], 'required'],
             [['FKid_user', 'FKid_game', 'FKid_genre', 'level'], 'integer'],
             [['FKid_user'], 'exist', 'skipOnError' => true, 'targetClass' => User::class, 'targetAttribute' => ['FKid_user' => 'id_user']],
-            [['FKid_game'], 'exist', 'skipOnError' => true, 'targetClass' => Game::class, 'targetAttribute' => ['FKid_game' => 'id_game']],
-            [['FKid_genre'], 'exist', 'skipOnError' => true, 'targetClass' => Genre::class, 'targetAttribute' => ['FKid_genre' => 'id_genre']],
+            [['FKid_game'], 'exist', 'skipOnError' => true, 'targetClass' => Games::class, 'targetAttribute' => ['FKid_game' => 'id_game']],
+            [['FKid_genre'], 'exist', 'skipOnError' => true, 'targetClass' => Genres::class, 'targetAttribute' => ['FKid_genre' => 'id_genre']],
         ];
     }
 
@@ -65,7 +65,7 @@ class Preference extends \yii\db\ActiveRecord
      */
     public function getGame()
     {
-        return $this->hasOne(Game::class, ['id_game' => 'FKid_game']);
+        return $this->hasOne(Games::class, ['id_game' => 'FKid_game']);
     }
 
     /**
@@ -75,7 +75,7 @@ class Preference extends \yii\db\ActiveRecord
      */
     public function getGenre()
     {
-        return $this->hasOne(Genre::class, ['id_genre' => 'FKid_genre']);
+        return $this->hasOne(Genres::class, ['id_genre' => 'FKid_genre']);
     }
 
     /**

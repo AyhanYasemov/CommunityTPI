@@ -55,27 +55,34 @@ class AvailabilityController extends Controller
      * Crée une disponibilité de maintenant à maintenant+2h
      */
     public function actionQuick()
-    {
-        $userId = Yii::$app->user->id;
-        $now    = new \DateTime();
-        $end    = (clone $now)->add(new \DateInterval('PT2H'));
+{
+    $userId = Yii::$app->user->identity->id_user;
 
-        $model = new Availability([
-            'start_date' => $now->format('Y-m-d H:i:00'),
-            'end_date'   => $end->format('Y-m-d H:i:00'),
-            'FKid_user'  => $userId,
-        ]);
+    $now = new \DateTime();
+    $end = (clone $now)->add(new \DateInterval('PT2H'));
 
+    $model = new Availability([
+        'start_date' => $now->format('Y-m-d H:i:00'),
+        'end_date'   => $end->format('Y-m-d H:i:00'),
+        'FKid_user'  => $userId,
+    ]);
+
+
+
+    try {
+        
         if ($model->save()) {
-            //Yii::$app->session->setFlash('success', 'Ta disponibilité immédiate a bien été ajoutée.');
-            Yii::$app->session->setFlash('error', 'Erreur : ' . json_encode($model->getErrors()));
-
+            Yii::$app->session->setFlash('success', 'Ta disponibilité immédiate a bien été ajoutée.');
         } else {
-            Yii::$app->session->setFlash('error', 'Impossible de créer la disponibilité immédiate.');
+            Yii::$app->session->setFlash('error', 'Erreur (validation) : ' . json_encode($model->getErrors()));
         }
-
-        return $this->redirect(['user/profile']);
+    } catch (\Throwable $e) {
+        Yii::$app->session->setFlash('error', 'Exception SQL : ' . $e->getMessage());
     }
+
+    return $this->redirect(['user/profile']);
+}
+
 
 
     // Suppression de la disponibilité

@@ -1,29 +1,11 @@
 <?php
-
 namespace app\models;
 
 use Yii;
+use yii\db\ActiveRecord;
 
-/**
- * This is the model class for table "session".
- *
- * @property int $id_session
- * @property string $start_date
- * @property string $end_date
- * @property int $status
- * @property int $FKid_host
- * @property string $name
- * @property int|null $FKid_game
- *
- * @property User[] $fKidUsers
- * @property Game $game
- * @property Participate[] $participates
- * @property User $user
- */
-class Session extends \yii\db\ActiveRecord
+class Session extends ActiveRecord
 {
-
-
     /**
      * {@inheritdoc}
      */
@@ -38,14 +20,11 @@ class Session extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['FKid_game'], 'default', 'value' => null],
-            [['status'], 'default', 'value' => 1],
-            [['start_date', 'end_date', 'FKid_host', 'name'], 'required'],
-            [['start_date', 'end_date'], 'safe'],
-            [['status', 'FKid_host', 'FKid_game'], 'integer'],
-            [['name'], 'string', 'max' => 255],
-            [['FKid_host'], 'exist', 'skipOnError' => true, 'targetClass' => User::class, 'targetAttribute' => ['FKid_host' => 'id_user']],
-            [['FKid_game'], 'exist', 'skipOnError' => true, 'targetClass' => Game::class, 'targetAttribute' => ['FKid_game' => 'id_game']],
+            [['startTime', 'sessionName', 'endTime', 'FKgameID'], 'required'],
+            [['startTime', 'endTime'], 'safe'],
+            [['sessionStatus', 'FKgameID'], 'integer'],
+            [['sessionName'], 'string', 'max' => 255],
+            [['FKgameID'], 'exist', 'skipOnError' => true, 'targetClass' => Games::class, 'targetAttribute' => ['FKgameID' => 'id']],
         ];
     }
 
@@ -55,54 +34,47 @@ class Session extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'id_session' => 'Id Session',
-            'start_date' => 'Start Date',
-            'end_date' => 'End Date',
-            'status' => 'Status',
-            'FKid_host' => 'F Kid Host',
-            'name' => 'Name',
-            'FKid_game' => 'F Kid Game',
+            'id' => 'ID',
+            'startTime' => 'Start Time',
+            'sessionName' => 'Session Name',
+            'endTime' => 'End Time',
+            'sessionStatus' => 'Session Status',
+            'FKgameID' => 'FK game ID',
         ];
     }
 
     /**
-     * Gets query for [[FKidUsers]].
+     * Gets query for [[FKgame]].
      *
      * @return \yii\db\ActiveQuery
      */
-    public function getFKidUsers()
+    public function getFKgame()
     {
-        return $this->hasMany(User::class, ['id_user' => 'FKid_user'])->viaTable('participate', ['FKid_session' => 'id_session']);
+        return $this->hasOne(Games::class, ['id' => 'FKgameID']);
     }
 
     /**
-     * Gets query for [[Game]].
+     * Gets query for [[Participants]].
      *
      * @return \yii\db\ActiveQuery
      */
-    public function getGame()
+    public function getParticipants()
     {
-        return $this->hasOne(Game::class, ['id_game' => 'FKid_game']);
+        return $this->hasMany(UsersParticipateSessions::class, ['session_id' => 'id']);
     }
 
     /**
-     * Gets query for [[Participates]].
+     * Gets query for [[AvailableUsers]].
      *
      * @return \yii\db\ActiveQuery
      */
-    public function getParticipates()
+    public function getAvailableUsers()
     {
-        return $this->hasMany(Participate::class, ['FKid_session' => 'id_session']);
+        return User::find()
+            ->joinWith(['availability', 'games'])
+            ->where(['games.id' => $this->FKgameID])
+            ->andWhere(['<=', 'availability.startTime', $this->startTime])
+            ->andWhere(['>=', 'availability.endTime', $this->endTime])
+            ->all();
     }
-
-    /**
-     * Gets query for [[User]].
-     *
-     * @return \yii\db\ActiveQuery
-     */
-    public function getUser()
-    {
-        return $this->hasOne(User::class, ['id_user' => 'FKid_host']);
-    }
-
 }

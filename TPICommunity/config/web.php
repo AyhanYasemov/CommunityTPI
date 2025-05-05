@@ -8,6 +8,12 @@ $config = [
     'basePath' => dirname(__DIR__),
     'bootstrap' => ['log'],
     'timeZone' => 'Europe/Paris',
+    // sert à savoir quand remonte la dernière requête/action fait par un utilisateur
+    'as lastActivity' => [
+        'class' => \app\components\LastActivityBehavior::class,
+    ],
+
+
     'aliases' => [
         '@bower' => '@vendor/bower-asset',
         '@npm'   => '@vendor/npm-asset',
@@ -31,9 +37,9 @@ $config = [
         // nécéssaire afin de passer sur une heure européenne au lieu de l'UTC
         'formatter' => [
             'class'           => 'yii\i18n\Formatter',
-           
+
             'defaultTimeZone' => 'Europe/Paris',
-            
+
             'timeZone'        => 'Europe/Paris',
         ],
 

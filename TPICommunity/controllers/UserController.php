@@ -13,7 +13,6 @@ use app\models\Availability;
 use app\models\Genres;
 use app\models\Platforms;
 use yii\web\NotFoundHttpException;
-use yii\web\ForbiddenHttpException;
 
 
 class UserController extends Controller
@@ -154,5 +153,24 @@ class UserController extends Controller
         Yii::$app->session->setFlash('success', 'Vos préférences ont été mises à jour.');
         return $this->redirect(['profile']);
     }
+
+    
+    /**
+     * Liste de tous les joueurs avec leurs préférences et statuts.
+     */
+    public function actionPlayerList()
+{
+    // Instancie le modèle de recherche (UserSearch étend User + gère genreFilter / platformFilter)
+    $searchModel  = new \app\models\UserSearch();
+    // Récupère les données selon les GET (filtres, pagination, etc.)
+    $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+
+    return $this->render('player-list', [
+        'searchModel'  => $searchModel,
+        'dataProvider' => $dataProvider,
+    ]);
+}
     
 }
+    
+

@@ -8,7 +8,7 @@ use yii\widgets\ActiveForm;
 /** @var yii\widgets\ActiveForm $form */
 ?>
 
-<div class="users-management-search">
+<div class="users-search">
 
     <?php $form = ActiveForm::begin([
         'action' => ['index'],
@@ -20,7 +20,7 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'id') ?>
 
-    <?= $form->field($model, 'username') ?>
+    <?=$form->field($model, 'username');?>
 
     <?= $form->field($model, 'email') ?>
 
@@ -28,9 +28,11 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'birthdate') ?>
 
-    <?php // echo $form->field($model, 'creationDate') ?>
+    <?php // echo $form->field($model, 'creationDate') 
+    ?>
 
-    <?php // echo $form->field($model, 'lastUpdated') ?>
+    <?php // echo $form->field($model, 'lastUpdated') 
+    ?>
 
 
 

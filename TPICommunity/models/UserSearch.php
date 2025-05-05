@@ -4,70 +4,70 @@ namespace app\models;
 
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
-use app\models\UsersManagement;
+use app\models\User;
 
-/**
- * UserSearch represents the model behind the search form of `app\models\UsersManagement`.
- */
-class UserSearch extends UsersManagement
+class UserSearch extends User
 {
+    /** Filtres pour genres et plateformes */
+    public $genreFilter = [];
+    public $platformFilter = [];
+
     /**
-     * {@inheritdoc}
+     * @inheritdoc
      */
     public function rules()
     {
-        return [
-            [['id'], 'integer'],
-            [['username', 'email', 'password', 'birthDate', 'creationDate', 'lastUpdated', 'discordFriendLink'], 'safe'],
+        return  [
+            [['username'], 'safe'], 
+            ['genreFilter', 'each', 'rule' => ['integer']],
+            ['platformFilter', 'each', 'rule' => ['integer']],
         ];
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritdoc
      */
     public function scenarios()
     {
-        // bypass scenarios() implementation in the parent class
+        // On bypass les scenarios du parent
         return Model::scenarios();
     }
 
     /**
-     * Creates data provider instance with search query applied
+     * Recherche avec possibilité de filtrer par genre et plateforme.
      *
      * @param array $params
-     *
      * @return ActiveDataProvider
      */
     public function search($params)
     {
-        $query = UsersManagement::find();
-
-        // add conditions that should always apply here
+        $query = User::find()->orderBy('username');
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
+            'pagination' => ['pageSize' => 20],
         ]);
 
+        // Charge les paramètres (GET)
         $this->load($params);
-
         if (!$this->validate()) {
-            // uncomment the following line if you do not want to return any records when validation fails
-            // $query->where('0=1');
             return $dataProvider;
         }
 
-        // grid filtering conditions
-        $query->andFilterWhere([
-            'id' => $this->id,
-            'birthDate' => $this->birthDate,
-            'creationDate' => $this->creationDate,
-            'lastUpdated' => $this->lastUpdated,
-        ]);
+        // Si un ou plusieurs genres sont sélectionnés, on joint la table genre
+        if ($this->genreFilter) {
+            $query->joinWith('preferredGenres')
+                  ->andWhere(['genre.id_genre' => $this->genreFilter]);
+        }
 
-        $query->andFilterWhere(['like', 'username', $this->username])
-            ->andFilterWhere(['like', 'email', $this->email])
-            ->andFilterWhere(['like', 'password', $this->password])
-            ->andFilterWhere(['like', 'discordFriendLink', $this->discordFriendLink]);
+        // Pareil pour les plateformes
+        if ($this->platformFilter) {
+            $query->joinWith('preferredPlatforms')
+                  ->andWhere(['platform.id_platform' => $this->platformFilter]);
+        }
+
+        $query->andFilterWhere(['like', 'username', $this->username]);
+
 
         return $dataProvider;
     }

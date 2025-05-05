@@ -51,6 +51,8 @@ class User extends ActiveRecord implements IdentityInterface
             'birthdate'  => 'Date de naissance',
             'created_at' => 'Date de création',
             'updated_at' => 'Dernière mise à jour',
+            'preferredGenreIds'   => 'Genres de jeu ',
+            'preferredPlatformIds' => 'Plateformes de jeu ',
         ];
     }
 
@@ -88,7 +90,7 @@ class User extends ActiveRecord implements IdentityInterface
     public function getOwnGames()
     {
         return $this->hasMany(Games::class, ['id_game' => 'FKid_game'])
-                    ->viaTable('own', ['FKid_user' => 'id_user']);
+            ->viaTable('own', ['FKid_user' => 'id_user']);
     }
 
     /**
@@ -107,13 +109,14 @@ class User extends ActiveRecord implements IdentityInterface
     public function getPreferredGenres()
     {
         return $this->hasMany(Genres::class, ['id_genre' => 'FKid_genre'])
-        ->viaTable('preference',
-            ['FKid_user' => 'id_user'],
-            function($query) {
-                // ce WHERE s'applique à la table 'preference'
-                $query->andWhere(['NOT', ['FKid_genre' => null]]);
-            }
-        );
+            ->viaTable(
+                'preference',
+                ['FKid_user' => 'id_user'],
+                function ($query) {
+                    // ce WHERE s'applique à la table 'preference'
+                    $query->andWhere(['NOT', ['FKid_genre' => null]]);
+                }
+            );
     }
 
     /**
@@ -123,13 +126,14 @@ class User extends ActiveRecord implements IdentityInterface
     public function getPreferredPlatforms()
     {
         return $this->hasMany(Platforms::class, ['id_platform' => 'FKid_platform'])
-        ->viaTable('preference',
-            ['FKid_user' => 'id_user'],
-            function($query) {
-                // de même, ce WHERE cible la table 'preference'
-                $query->andWhere(['NOT', ['FKid_platform' => null]]);
-            }
-        );
+            ->viaTable(
+                'preference',
+                ['FKid_user' => 'id_user'],
+                function ($query) {
+                    // de même, ce WHERE cible la table 'preference'
+                    $query->andWhere(['NOT', ['FKid_platform' => null]]);
+                }
+            );
     }
 
     /**
@@ -166,6 +170,12 @@ class User extends ActiveRecord implements IdentityInterface
         return $this->auth_key === $authKey;
     }
 
+    public function validatePassword($password)
+    {
+        return Yii::$app->security->validatePassword($password, $this->password);
+    }
+
+
     public function beforeSave($insert)
     {
         if (!parent::beforeSave($insert)) {
@@ -175,5 +185,40 @@ class User extends ActiveRecord implements IdentityInterface
             $this->auth_key = Yii::$app->security->generateRandomString();
         }
         return true;
+    }
+
+    public static function findByUsername($username)
+    {
+        return static::find()->where(['username' => $username])->one();
+    }
+
+    /**
+     * Statut calculé à la volée selon last_activity et disponibilités.
+     * @return int 1=Déconnecté, 2=Connecté, 3=Disponible
+     */
+    public function getComputedStatus(): int
+    {
+        // Seuil d'inactivité (par défaut : 10 minutes)
+        $idleThreshold = new \DateTime('-10 minutes');
+
+        // S'il n'y a jamais eu d'activité, on considère déconnecté
+        if ($this->last_activity === null || new \DateTime($this->last_activity) < $idleThreshold) {
+            return 1;
+        }
+
+            // Vérifie si une disponibilité est en cours
+    $now = new \yii\db\Expression('NOW()');
+    $isAvailable = Availability::find()
+        ->where(['FKid_user' => $this->id_user])
+        ->andWhere(['<=', 'start_date', $now])
+        ->andWhere(['>=', 'end_date', $now])
+        ->exists();
+
+        if ($isAvailable) {
+            return 3; // Disponible
+        }
+    
+        // Sinon — on est “connecté”
+        return 2;
     }
 }

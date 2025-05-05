@@ -9,7 +9,7 @@ use app\models\Sessions;
 /**
  * SessionsSearch represents the model behind the search form of `app\models\Sessions`.
  */
-class SessionsSearch extends Sessions
+class SessionsSearch extends Session
 {
     /**
      * {@inheritdoc}
@@ -40,7 +40,7 @@ class SessionsSearch extends Sessions
      */
     public function search($params)
     {
-        $query = Sessions::find();
+        $query = Session::find();
 
         // add conditions that should always apply here
 

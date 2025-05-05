@@ -7,7 +7,6 @@ use yii\filters\AccessControl;
 use yii\web\Controller;
 use yii\web\Response;
 use yii\filters\VerbFilter;
-use app\models\LoginForm;
 use app\models\ContactForm;
 use app\models\User;
 
@@ -77,27 +76,23 @@ class SiteController extends Controller
         if (!Yii::$app->user->isGuest) {
             return $this->goHome();
         }
-
-        $request = Yii::$app->request->post();
-
-        $user = new User();
-        if($request)
-        {
-            if ($user->load($request) && $user->login())
-            {
-                return $this->redirect(["site/index"]);
-            }
-
-            $session = Yii::$app->session;
-            $session->setFlash('errorMessages', $user->getErrors());
+    
+        $model = new \app\models\LoginForm();
+    
+        if ($model->load(Yii::$app->request->post()) && $model->login()) {
+            // l’utilisateur est authentifié avec succès :
+                $identity = Yii::$app->user->identity;
+        
+    
+            return $this->goHome();
         }
-
-
-        $user->password = '';
+    
         return $this->render('login', [
-            'user' => $user,
+            'model' => $model,
         ]);
     }
+    
+    
 
     /**
      * Logout action.
@@ -106,6 +101,14 @@ class SiteController extends Controller
      */
     public function actionLogout()
     {
+    // Met à jour le statut avant de déconnecter
+    if (!Yii::$app->user->isGuest) {
+        $user = Yii::$app->user->identity;
+        // On force une date ancienne pour que computedStatus renvoie 1 (déconnecté)
+        $user->last_activity = (new \DateTime('-1 hour'))->format('Y-m-d H:i:s');
+        $user->save(false);
+    }
+
         Yii::$app->user->logout();
 
         return $this->goHome();
@@ -148,13 +151,13 @@ class SiteController extends Controller
     {
         $user = new User();
         $session = Yii::$app->session;
-    
+
         if ($user->load(Yii::$app->request->post())) {
             // Affectation des données et hachage du mot de passe
             $postData = Yii::$app->request->post('User', []);
             $user->username = $postData['username'] ?? null;
             $user->password = Yii::$app->getSecurity()->generatePasswordHash($user->password);
-    
+
             if ($user->validate() && $user->save()) {
                 $session->setFlash('successMessage', 'Inscription Réussie');
                 return $this->redirect(['site/login']);
@@ -162,7 +165,7 @@ class SiteController extends Controller
                 $session->setFlash('errorMessages', $user->getErrors());
             }
         }
-    
+
         return $this->render('signup', [
             'model' => $user,
         ]);

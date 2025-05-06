@@ -137,40 +137,38 @@ class UserController extends Controller
     {
         $user = Yii::$app->user->identity;
         $post = Yii::$app->request->post('User', []);
-    
+
         // Si rien n’est posté, on force un tableau vide
-        $genreIds    = $post['preferredGenreIds']    ?? [];
-        $platformIds = $post['preferredPlatformIds'] ?? [];
-    
+        $genreIds = is_array($post['preferredGenreIds'] ?? null) ? $post['preferredGenreIds'] : [];
+        $platformIds = is_array($post['preferredPlatformIds'] ?? null) ? $post['preferredPlatformIds'] : [];
+
+
         // Détache toutes les anciennes préférences
         foreach ($user->getPreferredGenres()->all()    as $g) $user->unlink('preferredGenres',    $g, true);
         foreach ($user->getPreferredPlatforms()->all() as $p) $user->unlink('preferredPlatforms', $p, true);
-    
+
         // Recréé les nouvelles préférences
         foreach ($genreIds    as $gid) if ($g = Genres::findOne($gid))     $user->link('preferredGenres',    $g);
         foreach ($platformIds as $pid) if ($p = Platforms::findOne($pid)) $user->link('preferredPlatforms', $p);
-    
+
         Yii::$app->session->setFlash('success', 'Vos préférences ont été mises à jour.');
         return $this->redirect(['profile']);
     }
 
-    
+
     /**
      * Liste de tous les joueurs avec leurs préférences et statuts.
      */
     public function actionPlayerList()
-{
-    // Instancie le modèle de recherche (UserSearch étend User + gère genreFilter / platformFilter)
-    $searchModel  = new \app\models\UserSearch();
-    // Récupère les données selon les GET (filtres, pagination, etc.)
-    $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+    {
+        // Instancie le modèle de recherche (UserSearch étend User + gère genreFilter / platformFilter)
+        $searchModel  = new \app\models\UserSearch();
+        // Récupère les données selon les GET (filtres, pagination, etc.)
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
-    return $this->render('player-list', [
-        'searchModel'  => $searchModel,
-        'dataProvider' => $dataProvider,
-    ]);
+        return $this->render('player-list', [
+            'searchModel'  => $searchModel,
+            'dataProvider' => $dataProvider,
+        ]);
+    }
 }
-    
-}
-    
-

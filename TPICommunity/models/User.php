@@ -193,7 +193,7 @@ class User extends ActiveRecord implements IdentityInterface
     }
 
     /**
-     * Statut calculé à la volée selon last_activity et disponibilités.
+     * Statut calculé à la volée selon last_activity et disponibilités et session en cours.
      * @return int 1=Déconnecté, 2=Connecté, 3=Disponible
      */
     public function getComputedStatus(): int
@@ -205,19 +205,31 @@ class User extends ActiveRecord implements IdentityInterface
         if ($this->last_activity === null || new \DateTime($this->last_activity) < $idleThreshold) {
             return 1;
         }
+        //IMPORTANT ICI EXPLIQUER PK STATUS A ETE SUPPRIME
+        $now = new \yii\db\Expression('NOW()');
+    //Si l'utilisateur participe (ou host) à une session active => connecté
+    $inSession = (new \yii\db\Query())
+        ->from('participate p')
+        ->join('JOIN', 'session s',
+            's.id_session = p.FKid_session AND p.FKid_user = :uid',
+            [':uid' => $this->id_user])
+        ->andWhere(['<=', 's.start_date',  $now])
+        ->andWhere(['>=', 's.end_date',    $now])
+        ->exists();
+    if ($inSession) {
+        return 2;
+    }
 
-            // Vérifie si une disponibilité est en cours
-    $now = new \yii\db\Expression('NOW()');
-    $isAvailable = Availability::find()
+        // 3) Sinon on regarde la disponibilité
+        $isAvailable = Availability::find()
         ->where(['FKid_user' => $this->id_user])
         ->andWhere(['<=', 'start_date', $now])
-        ->andWhere(['>=', 'end_date', $now])
+        ->andWhere(['>=', 'end_date',   $now])
         ->exists();
+    if ($isAvailable) {
+        return 3;
+    }
 
-        if ($isAvailable) {
-            return 3; // Disponible
-        }
-    
         // Sinon — on est “connecté”
         return 2;
     }

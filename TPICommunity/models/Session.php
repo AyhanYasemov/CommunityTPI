@@ -50,7 +50,7 @@ class Session extends ActiveRecord
             'start_date' => 'Date et heure de début',
             'end_date'  => 'Date et heure de fin',
             'platformIds'    => 'Plateformes',
-            'participantIds' => 'Participants initiaux',
+            'participantIds' => 'Participants',
         ];
     }
 
@@ -93,7 +93,7 @@ class Session extends ActiveRecord
         $this->end_date   = date('Y-m-d H:i:00', strtotime($this->end_date));
         return true;
     }
-    
+
     public function afterFind()
     {
         parent::afterFind();
@@ -119,12 +119,17 @@ class Session extends ActiveRecord
         }
 
         // sync participants
+        // on vide d'abord l’ancienne liste
+
         \app\models\Participate::deleteAll(['FKid_session' => $this->id_session]);
-        foreach ($this->participantIds as $uid) {
-            $link = new \app\models\Participate();
-            $link->FKid_session = $this->id_session;
-            $link->FKid_user    = $uid;
-            $link->save(false);
+        // puis seulement si participantIds est un tableau, on boucle
+        if (is_array($this->participantIds)) {
+            foreach ($this->participantIds as $uid) {
+                $link = new \app\models\Participate();
+                $link->FKid_session = $this->id_session;
+                $link->FKid_user    = $uid;
+                $link->save(false);
+            }
         }
     }
 }

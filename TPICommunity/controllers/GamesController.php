@@ -48,7 +48,7 @@ class GamesController extends Controller
     public function actionCreate()
     {
         if (Yii::$app->user->identity->type !== 'admin') {
-            Yii::$app->session->setFlash('error', 'You do not have permission to create a game.');
+            Yii::$app->session->setFlash('error', 'Action reservée à l\'administrateur.');
             return $this->redirect(['index']);
         }
 
@@ -86,7 +86,7 @@ class GamesController extends Controller
     public function actionUpdate($id)
     {
         if (Yii::$app->user->identity->type !== 'admin') {
-            Yii::$app->session->setFlash('error', 'You do not have permission to update a game.');
+            Yii::$app->session->setFlash('error', 'Action reservée à l\'administrateur.');
             return $this->redirect(['index']);
         }
 
@@ -123,7 +123,7 @@ class GamesController extends Controller
     public function actionDelete($id)
     {
         if (Yii::$app->user->identity->type !== 'admin') {
-            Yii::$app->session->setFlash('error', 'You do not have permission to delete a game.');
+            Yii::$app->session->setFlash('error', 'Action reservée à l\'administrateur.');
             return $this->redirect(['index']);
         }
 
@@ -163,12 +163,12 @@ class GamesController extends Controller
             $userHaveGame->FKid_game = $gameId;
 
             if (!$userHaveGame->save()) {
-                Yii::$app->session->setFlash('error', 'There was an issue adding a game to your library.');
+                Yii::$app->session->setFlash('error', 'Problème lors de l\'ajout du jeu à votre bibliothèque.');
                 return $this->redirect(['games/catalogue']);
             }
         }
 
-        Yii::$app->session->setFlash('success', 'Your game library has been updated!');
+        Yii::$app->session->setFlash('success', 'Votre bibliothèque de jeux à été mis à jour.');
         return $this->redirect(['user/profile']);
     }
 
@@ -184,12 +184,12 @@ class GamesController extends Controller
 
         if ($ownRecord) {
             if ($ownRecord->delete()) {
-                Yii::$app->session->setFlash('success', 'Game successfully removed from your library.');
+                Yii::$app->session->setFlash('success', 'Jeu retiré de votre bibliothèque.');
             } else {
-                Yii::$app->session->setFlash('error', 'Failed to remove the game from your library.');
+                Yii::$app->session->setFlash('error', 'Problème lors du retrait du jeu de votre bibliothèque.');
             }
         } else {
-            Yii::$app->session->setFlash('warning', 'The game was not found in your library.');
+            Yii::$app->session->setFlash('warning', 'ce jeu n\'a pas été trouvé dans votre bibliothèque.');
         }
 
         return $this->redirect(['user/profile']); // Redirige vers la page de profil ou catalogue
@@ -207,16 +207,16 @@ class GamesController extends Controller
             ->exists();
 
         if ($alreadyExists) {
-            Yii::$app->session->setFlash('warning', 'This game is already in your library.');
+            Yii::$app->session->setFlash('warning', 'Ce jeu est déjà dans votre bibliothèque.');
         } else {
             $own = new \app\models\Own();
             $own->FKid_user = $userId;
             $own->FKid_game = $id;
 
             if ($own->save()) {
-                Yii::$app->session->setFlash('success', 'Game successfully added to your library.');
+                Yii::$app->session->setFlash('success', 'Jeu ajouté à votre bibliothèque.');
             } else {
-                Yii::$app->session->setFlash('error', 'Failed to add the game to your library.');
+                Yii::$app->session->setFlash('error', 'echec lors de l\'ajout du jeu à votre bibliothèque.');
             }
         }
 

@@ -1,4 +1,5 @@
 <?php
+
 use yii\widgets\Pjax;
 use yii\grid\GridView;
 use yii\helpers\Html;
@@ -34,7 +35,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'label'     => 'Genres préférés',
                 'attribute' => 'genreFilter',     // champs virtuel dans UserSearch
                 'format'    => 'raw',
-                'value'     => function($user) {
+                'value'     => function ($user) {
                     $names = ArrayHelper::getColumn($user->preferredGenres, 'name');
                     return empty($names)
                         ? '<span class="text-muted">Aucun</span>'
@@ -54,7 +55,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'label'     => 'Plateformes préférées',
                 'attribute' => 'platformFilter',   // champs virtuel dans UserSearch
                 'format'    => 'raw',
-                'value'     => function($user) {
+                'value'     => function ($user) {
                     $names = ArrayHelper::getColumn($user->preferredPlatforms, 'name');
                     return empty($names)
                         ? '<span class="text-muted">Aucune</span>'
@@ -72,11 +73,16 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'label'  => 'Statut',
                 'format' => 'raw',
-                'value'  => function($user) {
+                'value'  => function ($user) {
                     switch ($user->ComputedStatus) {
-                        case 3: return '<span class="badge bg-success">Disponible</span>';
-                        case 2: return '<span class="badge bg-info">Connecté</span>';
-                        default: return '<span class="badge bg-secondary">Déconnecté</span>';
+                        case 4:
+                            return '<span class="badge bg-warning">En session</span>';
+                        case 3:
+                            return '<span class="badge bg-success">Disponible</span>';
+                        case 2:
+                            return '<span class="badge bg-info">Connecté</span>';
+                        default:
+                            return '<span class="badge bg-secondary">Déconnecté</span>';
                     }
                 },
                 // on peut aussi filtrer sur le statut
@@ -84,6 +90,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     1 => 'Déconnecté',
                     2 => 'Connecté',
                     3 => 'Disponible',
+                    4 => 'En session',
                 ],
             ],
         ],

@@ -2,14 +2,14 @@
 
 /** @var yii\web\View $this */
 
-$this->title = '639th RC';
+$this->title = 'TPICommunity';
 ?>
 <div class="site-index">
 
     <div class="jumbotron text-center bg-transparent">
         <h1 class="display-4">Bienvenue !</h1>
 
-        <p class="lead">You have successfully created your Yii-powered application.</p>
+        <p class="lead">Sur ce projet de TPI afin de créer une application qui vous simplifie la vie !</p>
 
         <p><a class="btn btn-lg btn-success" href="http://www.yiiframework.com">Get started with Yii</a></p>
     </div>

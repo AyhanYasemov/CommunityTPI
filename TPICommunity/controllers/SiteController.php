@@ -76,23 +76,26 @@ class SiteController extends Controller
         if (!Yii::$app->user->isGuest) {
             return $this->goHome();
         }
-    
+
         $model = new \app\models\LoginForm();
-    
+
         if ($model->load(Yii::$app->request->post()) && $model->login()) {
             // l’utilisateur est authentifié avec succès :
-                $identity = Yii::$app->user->identity;
-        
+            $identity = Yii::$app->user->identity;
+            $userId   = $identity->id_user;
+    
+            // On efface notre flag « forceofflineuser »
+            Yii::$app->cache->delete("forceOfflineUser:{$userId}");
     
             return $this->goHome();
         }
-    
+
         return $this->render('login', [
             'model' => $model,
         ]);
     }
-    
-    
+
+
 
     /**
      * Logout action.
@@ -101,13 +104,12 @@ class SiteController extends Controller
      */
     public function actionLogout()
     {
-    // Met à jour le statut avant de déconnecter
-    if (!Yii::$app->user->isGuest) {
-        $user = Yii::$app->user->identity;
-        // On force une date ancienne pour que computedStatus renvoie 1 (déconnecté)
-        $user->last_activity = (new \DateTime('-1 hour'))->format('Y-m-d H:i:s');
-        $user->save(false);
-    }
+        // Met à jour le statut avant de déconnecter
+        if (!Yii::$app->user->isGuest) {
+            $userId = Yii::$app->user->id;
+            // On pose un drapeau “forcé offline” pour cet utilisateur pendant, disons, 1 heure
+            Yii::$app->cache->set("forceOfflineUser:$userId", true, 18000);
+        }
 
         Yii::$app->user->logout();
 

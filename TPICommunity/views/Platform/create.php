@@ -5,7 +5,7 @@ use yii\helpers\Html;
 /** @var yii\web\View $this */
 /** @var app\models\Platforms $model */
 
-$this->title = 'Create Platforms';
+$this->title = 'Créer Plateformes';
 $this->params['breadcrumbs'][] = ['label' => 'Platforms', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 ?>

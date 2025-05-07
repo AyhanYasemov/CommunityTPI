@@ -10,7 +10,7 @@ use yii\widgets\Pjax;
 /** @var app\models\PlatformsSearch $searchModel */
 /** @var yii\data\ActiveDataProvider $dataProvider */
 
-$this->title = 'Platforms';
+$this->title = 'Plateformes';
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="platforms-index">

@@ -194,43 +194,63 @@ class User extends ActiveRecord implements IdentityInterface
 
     /**
      * Statut calculé à la volée selon last_activity et disponibilités et session en cours.
-     * @return int 1=Déconnecté, 2=Connecté, 3=Disponible
+     * @return int 1=Déconnecté, 2=Connecté, 3=Disponible, 4=En session
      */
     public function getComputedStatus(): int
     {
-        // Seuil d'inactivité (par défaut : 10 minutes)
-        $idleThreshold = new \DateTime('-10 minutes');
 
-        // S'il n'y a jamais eu d'activité, on considère déconnecté
-        if ($this->last_activity === null || new \DateTime($this->last_activity) < $idleThreshold) {
+        $userId = $this->id_user;
+        // 0) Si le drapeau “forceOfflineUser” est présent, on renvoie 1 (Déconnecté) tout de suite
+        if (Yii::$app->cache->get("forceOfflineUser:$userId")) {
             return 1;
         }
-        //IMPORTANT ICI EXPLIQUER PK STATUS A ETE SUPPRIME
+        // Préparer NOW() pour les requêtes
         $now = new \yii\db\Expression('NOW()');
-    //Si l'utilisateur participe (ou host) à une session active => connecté
-    $inSession = (new \yii\db\Query())
-        ->from('participate p')
-        ->join('JOIN', 'session s',
-            's.id_session = p.FKid_session AND p.FKid_user = :uid',
-            [':uid' => $this->id_user])
-        ->andWhere(['<=', 's.start_date',  $now])
-        ->andWhere(['>=', 's.end_date',    $now])
-        ->exists();
-    if ($inSession) {
-        return 2;
-    }
 
-        // 3) Sinon on regarde la disponibilité
+        // 1) “En session” : check du statut HÔTE (l'hote n'est pas dans la table participate techniquement donc besoin de chercher autre part)
+        $isHostInSession = (new \yii\db\Query())
+            ->from('session s')
+            ->where(['s.FKid_host' => $this->id_user])
+            ->andWhere(['<=', 's.start_date', $now])
+            ->andWhere(['>=', 's.end_date',   $now])
+            ->exists();
+
+        // 2) “En session” : check du statut PARTICIPANT
+        $isParticipantInSession = (new \yii\db\Query())
+            ->from('participate p')
+            ->innerJoin(
+                'session s',
+                's.id_session = p.FKid_session AND p.FKid_user = :uid',
+                [':uid' => $this->id_user]
+            )
+            ->andWhere(['<=', 's.start_date', $now])
+            ->andWhere(['>=', 's.end_date',   $now])
+            ->exists();
+        // si l'hôte ou le participant est en session, retourner 4 (en session)
+        if ($isHostInSession || $isParticipantInSession) {
+            return 4; // En session
+        }
+
+        // 3) “Disponible” : j’ai une disponibilité en cours
         $isAvailable = Availability::find()
-        ->where(['FKid_user' => $this->id_user])
-        ->andWhere(['<=', 'start_date', $now])
-        ->andWhere(['>=', 'end_date',   $now])
-        ->exists();
-    if ($isAvailable) {
-        return 3;
-    }
+            ->where(['FKid_user' => $this->id_user])
+            ->andWhere(['<=', 'start_date', $now])
+            ->andWhere(['>=', 'end_date',   $now])
+            ->exists();
+        if ($isAvailable) {
+            return 3; // Disponible
+        }
 
-        // Sinon — on est “connecté”
-        return 2;
+        // 4) inactivité (>10 min sans requête)
+        $idleThreshold = new \DateTime('-10 minutes');
+        if (
+            $this->last_activity === null
+            || new \DateTime($this->last_activity) < $idleThreshold
+        ) {
+            return 1; // Déconnecté
+        }
+
+        // 5) Sinon : juste connecté
+        return 2; // Connecté
     }
 }

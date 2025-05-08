@@ -12,6 +12,7 @@ use yii\filters\AccessControl;
 use yii\web\Response;
 use yii\db\Query;
 use yii\db\Expression;
+use Sabre\VObject\Component\VCalendar;
 
 class SessionController extends Controller
 {
@@ -348,6 +349,48 @@ class SessionController extends Controller
         return ['output' => $out, 'selected' => $selected];
     }
 
+
+        /**
+     * Exporte les sessions planifiées de l’utilisateur au format ICS.
+     * Accessible à l’URL `/user/calendar.ics`
+     */
+    public function actionCalendar()
+    {
+        $userId = Yii::$app->user->id;
+        // Récupère toutes les sessions créées ou rejointes ET non terminées
+        $now = new \yii\db\Expression('NOW()');
+        $sessions = \app\models\Session::find()
+            ->alias('s')
+            ->leftJoin('participate p', 'p.FKid_session=s.id_session AND p.FKid_user=:uid', [':uid'=>$userId])
+            ->andWhere([
+                'or',
+                ['s.FKid_host' => $userId],
+                ['p.FKid_user'  => $userId],
+            ])
+            ->andWhere(['>', 's.end_date', $now])
+            ->orderBy(['s.start_date' => SORT_ASC])
+            ->all();
+
+        // Crée un VCalendar
+        $vcal = new VCalendar();
+        foreach ($sessions as $session) {
+            $vevent = $vcal->add('VEVENT', [
+                'UID'         => 'session-'.$session->id_session . '@'.Yii::$app->request->hostName,
+                'DTSTAMP'     => (new \DateTime())->format('Ymd\THis\Z'),
+                'DTSTART'     => (new \DateTime($session->start_date))->format('Ymd\THis'),
+                'DTEND'       => (new \DateTime($session->end_date))->format('Ymd\THis'),
+                'SUMMARY'     => $session->name,
+                'DESCRIPTION' => "Jeu : ".$session->game->name,
+                'URL'         => Yii::$app->urlManager->createAbsoluteUrl(['session/view','id'=>$session->id_session]),
+            ]);
+        }
+
+        // En-têtes HTTP pour un .ics
+        Yii::$app->response->format = Response::FORMAT_RAW;
+        Yii::$app->response->headers->set('Content-Type', 'text/calendar; charset=utf-8');
+        Yii::$app->response->headers->set('Content-Disposition', 'attachment; filename="my-sessions.ics"');
+        return $vcal->serialize();
+    }
 
     /**
      * Récupère ou lance 404.

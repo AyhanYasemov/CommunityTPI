@@ -17,11 +17,23 @@ class LoginForm extends Model
     public function rules()
     {
         return [
-            [['username', 'password'], 'required'],
+            [['username', 'password'], 'required', 'message' => 'Ce champ est requis.'],
             ['rememberMe',   'boolean'],
             ['password',     'validatePassword'],
         ];
     }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function attributeLabels()
+    {
+        return [
+            'username' => 'Nom d\'utilisateur',
+            'password' => 'Mot de passe',
+        ];
+    }
+
 
     public function validatePassword($attribute)
     {

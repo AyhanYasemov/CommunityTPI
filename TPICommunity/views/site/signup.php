@@ -23,7 +23,14 @@ if(isset($success))
 }
 
 ?>
-
+<?php
+$this->registerCss("
+    .required label::after {
+        content: ' *';
+        color: red;
+    }
+");
+?>
 <div class="site-signup">
     <h1><?= Html::encode($this->title) ?></h1>
 

@@ -9,9 +9,9 @@ $this->title = 'TPICommunity';
     <div class="jumbotron text-center bg-transparent">
         <h1 class="display-4">Bienvenue !</h1>
 
-        <p class="lead">Sur ce projet de TPI afin de créer une application qui vous simplifie la vie !</p>
-
-        <p><a class="btn btn-lg btn-success" href="http://www.yiiframework.com">Get started with Yii</a></p>
+        <p class="lead">Sur ce projet de TPI afin de créer une application qui vous simplifie la vie pour vos soirées de jeux !</p>
+        <p class="lead">Vous pouvez vous inscrire ou vous connecter pour profiter de toutes les fonctionnalités de
+            l'application.</p>
     </div>
 
     <div class="body-content">

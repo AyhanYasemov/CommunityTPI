@@ -29,7 +29,7 @@ class User extends ActiveRecord implements IdentityInterface
     public function rules()
     {
         return [
-            [['username', 'email', 'password'], 'required'],
+            [['username', 'email', 'password'], 'required', 'message' => 'Ce champ est requis.'],
             ['email', 'email'],
             [['username', 'email'], 'string', 'max' => 255],
             [['password'], 'string'],
@@ -74,14 +74,7 @@ class User extends ActiveRecord implements IdentityInterface
         return $this->hasMany(Session::class, ['FKid_host' => 'id_user']);
     }
 
-    /**
-     * Gets query for [[ParticipateSessions]].
-     * @return \yii\db\ActiveQuery
-     */
-    public function getParticipateSessions()
-    {
-        return $this->hasMany(UsersParticipateSessions::class, ['user_id' => 'id_user']);
-    }
+
 
     /**
      * Gets query for games owned by the user (table OWN)

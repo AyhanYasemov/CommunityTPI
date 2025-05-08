@@ -25,7 +25,8 @@
         "yiisoft/yii2-bootstrap4": "~2.0.0",
         "kartik-v/yii2-widget-select2": "^2.2",
         "kartik-v/yii2-krajee-base": "^3.0",
-        "kartik-v/yii2-widget-depdrop": "dev-master"
+        "kartik-v/yii2-widget-depdrop": "dev-master",
+        "sabre/vobject": "^4.2"
     },
     "require-dev": {
         "yiisoft/yii2-debug": "~2.1.0",

@@ -89,8 +89,14 @@ class Session extends ActiveRecord
         if (!parent::beforeSave($insert)) {
             return false;
         }
-        $this->start_date = date('Y-m-d H:i:00', strtotime($this->start_date));
-        $this->end_date   = date('Y-m-d H:i:00', strtotime($this->end_date));
+        try {
+            $this->start_date = (new \DateTime($this->start_date))->format('Y-m-d H:i:00');
+            $this->end_date   = (new \DateTime($this->end_date))->format('Y-m-d H:i:00');
+        } catch (\Exception $e) {
+            Yii::error("Invalid date format: " . $e->getMessage());
+            return false;
+        }
+    
         return true;
     }
 

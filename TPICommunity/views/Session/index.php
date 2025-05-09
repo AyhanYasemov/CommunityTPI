@@ -15,9 +15,9 @@ $this->params['breadcrumbs'][] = $this->title;
     <h1><?= Html::encode($this->title) ?></h1>
 
     <p>
-        <?= Html::a('Créer une session', ['create'], ['class' => 'btn btn-success']) ?>
-        <?= Html::a('Rejoindre une session', ['join'],   ['class' => 'btn btn-primary']) ?>
-        <?= Html::a('Exporter mes session vers mon agenda (.ics)', ['calendar'], [
+        <?= Html::a('➕ Créer une session', ['create'], ['class' => 'btn btn-success']) ?>
+        <?= Html::a('🤝 Rejoindre une session', ['join'],   ['class' => 'btn btn-primary']) ?>
+        <?= Html::a('📅 Exporter mes sessions vers mon agenda (.ics)', ['calendar'], [
             'class' => 'btn btn-outline-secondary',
             'target' => '_blank',
         ]) ?>
@@ -53,6 +53,13 @@ $this->params['breadcrumbs'][] = $this->title;
                     return empty($names)
                         ? '<span class="text-muted">Aucune</span>'
                         : Html::encode(implode(', ', $names));
+                },
+            ],
+
+            [
+                'label' => '👥 Participants',
+                'value' => function ($model) {
+                    return count($model->participants);
                 },
             ],
 

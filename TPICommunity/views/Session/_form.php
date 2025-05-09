@@ -16,6 +16,9 @@ use kartik\depdrop\DepDrop;
 
     <?php $form = ActiveForm::begin(); ?>
 
+
+    <?= \yii\helpers\Html::a('⬅️ Retour', ['index'], ['class' => 'btn btn-secondary']) ?>
+
     <?= $form->field($model, 'name')->textInput() ?>
 
     <?= $form->field($model, 'start_date')

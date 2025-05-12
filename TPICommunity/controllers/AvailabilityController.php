@@ -24,7 +24,7 @@ class AvailabilityController extends Controller
         ];
     }
 
-    // Création de la disponibilité (en modal )
+    // Création de la disponibilité (en model )
     public function actionCreate()
     {
         $model = new Availability();

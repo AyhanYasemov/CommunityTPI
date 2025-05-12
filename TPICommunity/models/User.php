@@ -12,7 +12,6 @@ class User extends ActiveRecord implements IdentityInterface
     public $preferredGenreIds   = [];
     public $preferredPlatformIds = [];
     public $authKey;
-    public $accessToken;
     public $rememberMe = true;
 
     /**
@@ -77,7 +76,7 @@ class User extends ActiveRecord implements IdentityInterface
 
 
     /**
-     * Gets query for games owned by the user (table OWN)
+     * Requête pour la table OWN
      * @return \yii\db\ActiveQuery
      */
     public function getOwnGames()
@@ -87,7 +86,7 @@ class User extends ActiveRecord implements IdentityInterface
     }
 
     /**
-     * Gets query for raw preferences of the user
+     * Requête pour la table PREFERENCE
      * @return \yii\db\ActiveQuery
      */
     public function getPreferences()
@@ -96,7 +95,7 @@ class User extends ActiveRecord implements IdentityInterface
     }
 
     /**
-     * Gets query for preferred genres via table PREFERENCE
+     * Requête pour la table PREFERENCE pour le genre
      * @return \yii\db\ActiveQuery
      */
     public function getPreferredGenres()
@@ -113,7 +112,7 @@ class User extends ActiveRecord implements IdentityInterface
     }
 
     /**
-     * Gets query for preferred platforms via table PREFERENCE
+     * Requête pour la table PREFERENCE pour la plateforme
      * @return \yii\db\ActiveQuery
      */
     public function getPreferredPlatforms()
@@ -130,14 +129,14 @@ class User extends ActiveRecord implements IdentityInterface
     }
 
     /**
-     * Finds by email
+     * Trouve l'utilisateur par son mail
      */
     public static function findByUserEmail($email)
     {
         return self::findOne(["email" => $email]);
     }
 
-    // IdentityInterface methods
+    // Methode identityInterface
     public static function findIdentity($id)
     {
         return static::findOne(['id_user' => $id]);
@@ -193,9 +192,9 @@ class User extends ActiveRecord implements IdentityInterface
     {
 
         $userId = $this->id_user;
-        // 0) Si le drapeau “forceOfflineUser” est présent, on renvoie 1 (Déconnecté) tout de suite
+        // 0) Si le drapeau “forceOfflineUser” est présent, on renvoie 1 (Déconnecté) tout de suite (forceOffline s'active via la méthode actionlogout dans sitecontroller)
         if (Yii::$app->cache->get("forceOfflineUser:$userId")) {
-            return 1;
+            return 1; // Déconnecté
         }
         // Préparer NOW() pour les requêtes
         $now = new \yii\db\Expression('NOW()');
@@ -243,7 +242,7 @@ class User extends ActiveRecord implements IdentityInterface
             return 1; // Déconnecté
         }
 
-        // 5) Sinon : juste connecté
+        // 5) Sinon : connecté
         return 2; // Connecté
     }
 }

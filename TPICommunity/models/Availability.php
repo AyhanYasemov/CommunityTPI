@@ -56,6 +56,7 @@ class Availability extends ActiveRecord
         }
         $this->start_date = date('Y-m-d H:i:00', strtotime($this->start_date));
         $this->end_date   = date('Y-m-d H:i:00', strtotime($this->end_date));
+
         return true;
     }
 }

@@ -31,24 +31,25 @@ $this->params['breadcrumbs'][] = $this->title;
             'name',
             [
                 'label' => 'Jeu',
-                'value' => function ($m) {
-                    return $m->game->name;
+                'value' => function ($model) {
+                    return $model->game ? $model->game->name : '(Jeu supprimé)';
                 },
             ],
             [
                 'label' => 'Genres',
-                'format' => 'raw',
-                'value' => function ($m) {
-                    $names = ArrayHelper::getColumn($m->game->genres, 'name');
-                    return implode(', ', $names);
+                'value' => function($model) {
+                    if ($model->game && $model->game->genres) {
+                        return implode(', ', array_map(function($genre) {
+                            return $genre->name;
+                        }, $model->game->genres));
+                    }
+                    return 'Aucun';
                 },
             ],
             [
                 'label'  => 'Plateformes',
                 'format' => 'raw',
                 'value'  => function ($m) {
-                    // Avant : $m->game->platforms
-                    // Maintenant : on affiche celles que l’hôte a sélectionnées
                     $names = ArrayHelper::getColumn($m->platforms, 'name');
                     return empty($names)
                         ? '<span class="text-muted">Aucune</span>'

@@ -38,8 +38,8 @@ class Platforms extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'id_platform' => 'ID platform',
-            'name' => 'Platform Name',
+            'id_platform' => 'ID plateforme',
+            'name' => 'Nom de la plateforme',
         ];
     }
 

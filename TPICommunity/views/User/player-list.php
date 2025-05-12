@@ -10,7 +10,6 @@ use app\models\Platforms;
 
 /* @var $this yii\web\View */
 /* @var $dataProvider yii\data\ActiveDataProvider */
-/* @var $searchModel app\models\UserSearch  */  /* <- Il te faut un UserSearch qui étend ActiveRecord + ajoute les relations de filtre */
 
 $this->title = 'Liste des joueurs';
 $this->params['breadcrumbs'][] = $this->title;
@@ -23,7 +22,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
-        'filterModel'  => $searchModel,        // <-- on active les filtres
+        'filterModel'  => $searchModel,        
         'tableOptions' => ['class' => 'table table-striped'],
         'columns' => [
             ['class' => 'yii\grid\SerialColumn'],
@@ -33,7 +32,7 @@ $this->params['breadcrumbs'][] = $this->title;
             // Filtre multi-sélection Genres
             [
                 'label'     => 'Genres préférés',
-                'attribute' => 'genreFilter',     // champs virtuel dans UserSearch
+                'attribute' => 'genreFilter',     
                 'format'    => 'raw',
                 'value'     => function ($user) {
                     $names = ArrayHelper::getColumn($user->preferredGenres, 'name');
@@ -53,7 +52,7 @@ $this->params['breadcrumbs'][] = $this->title;
             // Filtre multi-sélection Plateformes
             [
                 'label'     => 'Plateformes préférées',
-                'attribute' => 'platformFilter',   // champs virtuel dans UserSearch
+                'attribute' => 'platformFilter',   
                 'format'    => 'raw',
                 'value'     => function ($user) {
                     $names = ArrayHelper::getColumn($user->preferredPlatforms, 'name');

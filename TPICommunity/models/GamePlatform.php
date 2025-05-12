@@ -43,8 +43,8 @@ class GamePlatform extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'game_id' => 'Game ID',
-            'platform_id' => 'Platform ID',
+            'game_id' => 'Jeu ID',
+            'platform_id' => 'Plateforme ID',
         ];
     }
 

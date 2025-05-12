@@ -45,8 +45,8 @@ class Participate extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'FKid_user' => 'F Kid User',
-            'FKid_session' => 'F Kid Session',
+            'FKid_user' => 'id utilisateur',
+            'FKid_session' => 'id Session',
         ];
     }
 

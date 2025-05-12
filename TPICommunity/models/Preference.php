@@ -59,7 +59,7 @@ class Preference extends \yii\db\ActiveRecord
     }
 
     /**
-     * Gets query for [[Game]].
+     * Requête pour [[Game]].
      *
      * @return \yii\db\ActiveQuery
      */
@@ -69,7 +69,7 @@ class Preference extends \yii\db\ActiveRecord
     }
 
     /**
-     * Gets query for [[Genre]].
+     * Requête pour [[Genre]].
      *
      * @return \yii\db\ActiveQuery
      */
@@ -79,7 +79,7 @@ class Preference extends \yii\db\ActiveRecord
     }
 
     /**
-     * Gets query for [[User]].
+     * Requête pour [[User]].
      *
      * @return \yii\db\ActiveQuery
      */
